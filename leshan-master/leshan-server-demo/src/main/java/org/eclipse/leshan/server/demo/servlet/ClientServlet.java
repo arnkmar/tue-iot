@@ -17,7 +17,10 @@ package org.eclipse.leshan.server.demo.servlet;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 
@@ -66,6 +69,10 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.sun.tools.javac.util.List;
+
+import org.eclipse.leshan.server.demo.LeshanServerSQLite;
+import org.eclipse.leshan.server.demo.manager;
 
 /**
  * Service HTTP REST API calls.
@@ -81,6 +88,8 @@ public class ClientServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     private final LwM2mServer server;
+    public static LwM2mServer server_static;
+    
 
     private final Gson gson;
 
@@ -102,7 +111,8 @@ public class ClientServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    	
+    	System.out.println("do GET.");
+    	System.out.println(req);
         // all registered clients
         if (req.getPathInfo() == null) {
             Collection<Registration> registrations = new ArrayList<>();
@@ -173,6 +183,10 @@ public class ClientServlet extends HttpServlet {
                 // create & process request
                 ReadRequest request = new ReadRequest(contentFormat, target);
                 ReadResponse cResponse = server.send(registration, request, TIMEOUT);
+                System.out.println(request);
+                System.out.println(contentFormat);
+                System.out.println(target);
+                System.out.println(cResponse.toString());
                 processDeviceResponse(req, resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -181,6 +195,41 @@ public class ClientServlet extends HttpServlet {
         } catch (RuntimeException | InterruptedException e) {
             handleException(e, resp);
         }
+    }
+    
+    public static void getResource(Registration registration) throws SQLException {
+    	String target1 = "/32700/0/32801";
+    	String target2 = "/32700/0/32802";
+    	long TIMEOUT = 5000; // ms
+    	try {
+    	ReadRequest request = new ReadRequest(ContentFormat.fromName("JSON"), target1);
+    	ReadResponse cResponse = server_static.send(registration, request, TIMEOUT);
+    	String occupancy = cResponse.getContent().toString();
+//    	java.util.List<String> respList = Arrays.asList(str.split(/));
+//        System.out.println("***************************");
+//        System.out.println(request);
+//        System.out.println(cResponse);
+//        System.out.println(str);
+//        for (int i=0;i<respList.size();i++)
+//        { System.out.println(respList.get(i));
+//        System.out.println("test");
+//        }
+//        System.out.println("***************************");
+    	ReadRequest request2 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
+    	ReadResponse cResponse2 = server_static.send(registration, request2, TIMEOUT);
+    	String carID = cResponse2.getContent().toString();
+
+//    	ReadRequest request3 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
+//    	ReadResponse cResponse3 = server_static.send(registration, request2, TIMEOUT);
+//    	String spotID = cResponse3.getContent().toString();    	
+    												
+
+    	
+        LeshanServerSQLite.ToSQLDB("OVERVIEW",2,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),occupancy,carID,0,null,null );
+    	}
+    	catch (RuntimeException | InterruptedException e) {
+    		System.out.println(e);
+    	}
     }
 
     private void handleException(Exception e, HttpServletResponse resp) throws IOException {
@@ -386,6 +435,7 @@ public class ClientServlet extends HttpServlet {
             resp.setContentType("application/json");
             resp.getOutputStream().write(response.getBytes());
             resp.setStatus(HttpServletResponse.SC_OK);
+            System.out.println(response);
         }
     }
 

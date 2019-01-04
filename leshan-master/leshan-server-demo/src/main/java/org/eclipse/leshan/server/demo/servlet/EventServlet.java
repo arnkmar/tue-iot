@@ -17,6 +17,7 @@ package org.eclipse.leshan.server.demo.servlet;
 
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +33,7 @@ import org.eclipse.leshan.core.response.ObserveResponse;
 import org.eclipse.leshan.server.californium.impl.LeshanServer;
 import org.eclipse.leshan.server.demo.LeshanServerDemo;
 import org.eclipse.leshan.server.demo.LeshanServerSQLite;
+import org.eclipse.leshan.server.demo.manager;
 import org.eclipse.leshan.server.demo.servlet.json.LwM2mNodeSerializer;
 import org.eclipse.leshan.server.demo.servlet.json.RegistrationSerializer;
 import org.eclipse.leshan.server.demo.servlet.log.CoapMessage;
@@ -88,16 +90,27 @@ public class EventServlet extends EventSourceServlet {
                 Collection<Observation> previousObsersations) {
             String jReg = EventServlet.this.gson.toJson(registration);
             System.out.println("registration");
+            System.out.println(jReg );
+            
+        
+            //LeshanServerSQLite.ToSQLDB(1,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),null,null,0,null,null );
+            //System.out.println(registration.getObjectLinks());
+            //System.out.println(registration.getSortedObjectLinks());
+            System.out.println("Registration Done. geTreasource Calling");
+            //manager.query_resource_status();
             
             
-            
-            
-            LeshanServerSQLite.ToSQLDB(1,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),null,null,0,null,null );
-            
+            try {
+				ClientServlet.getResource(registration);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             
             sendEvent(EVENT_REGISTRATION, jReg, registration.getEndpoint());
             
         }
+
 
         @Override
         public void updated(RegistrationUpdate update, Registration updatedRegistration,
@@ -112,6 +125,12 @@ public class EventServlet extends EventSourceServlet {
                 Registration newReg) {
             String jReg = EventServlet.this.gson.toJson(registration);
             System.out.println("unregistration");
+            try {
+				LeshanServerSQLite.ToSQLDB("OVERVIEW",2,Instant.now().getEpochSecond(),"De-registration",registration.getEndpoint(),null,null,0,null,null );
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
             sendEvent(EVENT_DEREGISTRATION, jReg, registration.getEndpoint());
         }
 

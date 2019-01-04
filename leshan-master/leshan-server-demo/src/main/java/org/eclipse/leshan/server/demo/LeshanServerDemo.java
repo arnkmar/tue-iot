@@ -437,6 +437,10 @@ public class LeshanServerDemo {
         ServletHolder objectSpecServletHolder = new ServletHolder(new ObjectSpecServlet(lwServer.getModelProvider()));
         root.addServlet(objectSpecServletHolder, "/api/objectspecs/*");
 
+        
+        
+        ClientServlet.server_static= lwServer;
+        
         // Register a service to DNS-SD
         if (publishDNSSdServices) {
 
