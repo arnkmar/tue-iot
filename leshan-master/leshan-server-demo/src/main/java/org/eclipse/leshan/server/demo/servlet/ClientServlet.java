@@ -299,14 +299,14 @@ public class ClientServlet extends HttpServlet {
         	String Endtime = path[2];       	
         	String TableName = path[3];
         	String carNumber = path[4];
-        	String rate= "Reserved" ;
+        	
         	System.out.println(TableName);
         	System.out.println(carNumber);
-        	processDeviceResponse_user(req, resp, rate);
-        	
+        	Long now = Instant.now().getEpochSecond();
+        	String rate= "Reserved" ;
         	
 			   String str = "INSERT INTO "+ TableName +" (TIME,RSTART,REND,RCAR) VALUES (" 
-			   + Long.toString(Instant.now().getEpochSecond())
+			   + Long.toString(now)
 			   + ",'"+StartTime
 			   +"','"+ Endtime
 			   + "','"+carNumber
@@ -315,8 +315,8 @@ public class ClientServlet extends HttpServlet {
 			   try {
 				   System.out.println("To insert"+str);
 				LeshanServerSQLite.insert(str);
-				    
-				   
+				   rate=rate+",ReferenceID,"+Long.toString(now); 
+				processDeviceResponse_user(req, resp, rate);	   
 				   
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
