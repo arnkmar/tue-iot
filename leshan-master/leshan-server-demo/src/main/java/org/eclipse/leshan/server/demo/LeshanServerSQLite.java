@@ -266,7 +266,7 @@ else if (code ==2) // oVERVIEW
 		   }
 	   
 	   
-	   public static String userToDB (int code, int start, int duration ) {
+	   public static String userToDB (int code, int start, int end ) {
 		   
 		   String ret = null;
 		   
@@ -320,8 +320,8 @@ else if (code ==2) // oVERVIEW
 							"SELECT  *" + 
 							" FROM "+tableName+" r " + 
 							" WHERE ("+Integer.toString(start)+" BETWEEN r.RSTART AND r.REND) " + 
-							" OR ("+Integer.toString(start+duration-1)+" BETWEEN r.RSTART AND r.REND) " + 
-							" OR ("+Integer.toString(start)+" <= r.RSTART AND "+Integer.toString(start+duration-1)+" >= r.REND);";
+							" OR ("+Integer.toString(end)+" BETWEEN r.RSTART AND r.REND) " + 
+							" OR ("+Integer.toString(start)+" <= r.RSTART AND "+Integer.toString(end)+" >= r.REND);";
 				System.out.println(sql);
 				
 				try {

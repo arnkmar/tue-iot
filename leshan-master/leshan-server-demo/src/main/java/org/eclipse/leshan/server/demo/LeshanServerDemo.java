@@ -248,7 +248,7 @@ public class LeshanServerDemo {
 
         LeshanServerSQLite.create(2,"overview Table creation");
         LeshanServerSQLite.create(3,"All events recording table");
-       	LeshanServerSQLite.userToDB(1,6,7);
+       	//LeshanServerSQLite.userToDB(1,6,7);
      
         
         //LeshanServerSQLite.insert();
