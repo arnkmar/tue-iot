@@ -1,10 +1,15 @@
 import requests
 import json
-from datetime import datetime
+import datetime
+import time
 
 
-StartTime =input('Enter Start Time: ')
-End = input('Enter Number of hours: ')
+dt1 =raw_input('Enter Start Time: ')
+dt2 = raw_input('Enter Number of hours: ')
+
+
+StartTime = int(time.mktime(datetime.datetime.strptime(dt1,"%d/%m/%Y %H:%M:%S").timetuple()))
+End = int(time.mktime(datetime.datetime.strptime(dt2,"%d/%m/%Y %H:%M:%S").timetuple()))
 
 query = "http://192.168.178.39:8080/api/clients/httpQuery/"+str(StartTime)+"/"+str(End)
 
