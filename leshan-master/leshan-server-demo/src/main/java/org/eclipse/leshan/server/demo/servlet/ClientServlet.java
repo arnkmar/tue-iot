@@ -226,6 +226,7 @@ public class ClientServlet extends HttpServlet {
 
     	
         LeshanServerSQLite.ToSQLDB("OVERVIEW",2,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),occupancy,carID,0,null,null );
+        LeshanServerSQLite.create(1,registration.getEndpoint()); // table for registration service
     	}
     	catch (RuntimeException | InterruptedException e) {
     		System.out.println(e);
@@ -267,7 +268,76 @@ public class ClientServlet extends HttpServlet {
     @Override
     protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
+        
+        
+        if(path[0].equals("httpQuery")) {
+        	System.out.println("yes");
+        	int StartTime = Integer.valueOf(path[1]);
+        	int Endtime = Integer.valueOf(path[2]);
+        	
+        			
+        			//for(int i =0 ; i<path.length;i++)
+        	System.out.println(StartTime);
+        	System.out.println(Endtime);
+        	
+        	//To-Do
+        	//Check Database for free slots - convert to a string
+        	
+        	
+        	//String rate= "'{\"id\":\"1\",\"class\":\"3\"}'" ;
+        	String rate= LeshanServerSQLite.userToDB(1, StartTime, Endtime);
+//        			"{'id':'pk-1','id':'pk-2'}";
+        	System.out.println(rate);
+        	processDeviceResponse_user(req, resp, rate);
+        	
+        	return;
+        }
+        	
+        if(path[0].equals("choice")) {
+        	System.out.println("yes");
+        	String StartTime = path[1];
+        	String Endtime = path[2];       	
+        	String TableName = path[3];
+        	String carNumber = path[4];
+        	String rate= "Reserved" ;
+        	System.out.println(TableName);
+        	System.out.println(carNumber);
+        	processDeviceResponse_user(req, resp, rate);
+        	
+        	
+			   String str = "INSERT INTO "+ TableName +" (TIME,RSTART,REND,RCAR) VALUES (" 
+			   + Long.toString(Instant.now().getEpochSecond())
+			   + ",'"+StartTime
+			   +"','"+ Endtime
+			   + "','"+carNumber
+			   + "');" ;
+		 		
+			   try {
+				   System.out.println("To insert"+str);
+				LeshanServerSQLite.insert(str);
+				    
+				   
+				   
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	
+        	//Insert to database
+        	
+        	return;
+        	
+        }
+        
+
+        
+        
+        
+        
         String clientEndpoint = path[0];
+        System.out.println(clientEndpoint);
+        
+        System.out.println(req);
 
         // at least /endpoint/objectId/instanceId
         if (path.length < 3) {
@@ -277,6 +347,7 @@ public class ClientServlet extends HttpServlet {
 
         try {
             String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
+            
             Registration registration = server.getRegistrationService().getByEndpoint(clientEndpoint);
             if (registration != null) {
                 // get content format
@@ -289,6 +360,7 @@ public class ClientServlet extends HttpServlet {
                 LwM2mNode node = extractLwM2mNode(target, req);
                 WriteRequest request = new WriteRequest(Mode.REPLACE, contentFormat, target, node);
                 WriteResponse cResponse = server.send(registration, request, TIMEOUT);
+                System.out.println(request);
                 processDeviceResponse(req, resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -306,6 +378,8 @@ public class ClientServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
         String clientEndpoint = path[0];
+        System.out.println("Post");
+        System.out.println(req);
 
         // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
         if (path.length >= 3 && "observe".equals(path[path.length - 1])) {
@@ -439,6 +513,21 @@ public class ClientServlet extends HttpServlet {
         }
     }
 
+    private void processDeviceResponse_user(HttpServletRequest req, HttpServletResponse resp, String response)
+            throws IOException {
+        if (response == null) {
+            LOG.warn(String.format("Request %s%s timed out.", req.getServletPath(), req.getPathInfo()));
+            resp.setStatus(HttpServletResponse.SC_NO_CONTENT);
+            resp.getWriter().append("Request timeout").flush();
+        } else {
+          
+            resp.setContentType("application/json");
+            resp.getOutputStream().write(response.getBytes());
+            resp.setStatus(HttpServletResponse.SC_OK);
+            System.out.println(response);
+        }
+    }    
+    
     private LwM2mNode extractLwM2mNode(String target, HttpServletRequest req) throws IOException {
         String contentType = StringUtils.substringBefore(req.getContentType(), ";");
         if ("application/json".equals(contentType)) {

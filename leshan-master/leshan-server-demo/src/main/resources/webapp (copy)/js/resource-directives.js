@@ -150,7 +150,7 @@ angular.module('resourceDirectives', [])
                         rsc["id"] = scope.resource.def.id;
                         value = lwResources.getTypedValue(value, scope.resource.def.type);
                         rsc["value"] = value;
-                        alert(rsc);
+
                         var format = scope.settings.single.format;
                         $http({method: 'PUT', url: "api/clients/" + $routeParams.clientId + scope.resource.path, data: rsc, headers:{'Content-Type': 'application/json'},params:{format:format}})
                         .success(function(data, status, headers, config) {

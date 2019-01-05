@@ -16,10 +16,10 @@
  *                                                     processing multiple resources
  *******************************************************************************/
 
-var lwClientControllers = angular.module('clientControllers', []);
+var parkingSpotControllers = angular.module('reservationController', []);
 
 // Update client in a list of clients (replaces the client with the same endpoint))
-function updateClients(updated, clients) {
+function updateClient(updated, clients) {
     return clients.reduce(function(accu, client) {
         if (updated.endpoint === client.endpoint) {
             accu.push(updated);
@@ -30,11 +30,13 @@ function updateClients(updated, clients) {
     }, []);
 }
 
-lwClientControllers.controller('ClientListCtrl', [
+
+
+parkingSpotControllers.controller('parkingReservationCtrl', [
     '$scope',
     '$http',
     '$location',
-    function ClientListCtrl($scope, $http,$location) {
+    function parkingReservationCtrl($scope, $http,$location) {
 
         // update navbar
         angular.element("#navbar").children().removeClass('active');
@@ -46,10 +48,88 @@ lwClientControllers.controller('ClientListCtrl', [
                 $scope.eventsource.close();
             }
         });
+        
+        $scope.reserve = function() {
+        	
+        	alert("in Reserve - up"); 
+        	
+        	console.log('on Console');
+        	
+            $('#writeModalLabel').text(scope.resource.def.name);
+            $('#writeInputValue').val(scope.resource.value);
+            $('#writeSubmit').unbind();
+            $('#writeSubmit').click(function(e){
+                e.preventDefault();
+                var value = $('#writeInputValue').val();
+
+                if(value != undefined) {
+                    $('#writeModal').modal('hide');
+
+                    var rsc = {};
+                    rsc["id"] = scope.resource.def.id;
+                    value = lwResources.getTypedValue(value, scope.resource.def.type);
+                    rsc["value"] = value;
+
+                    var format = scope.settings.single.format;
+                    $http({method: 'PUT', url: "api/clients/" + $routeParams.clientId + scope.resource.path, data: rsc, headers:{'Content-Type': 'application/json'},params:{format:format}})
+                    .success(function(data, status, headers, config) {
+                    	helper.handleResponse(data, scope.resource.write, function (formattedDate){
+                    		if (data.success) {
+                                scope.resource.value = value;
+                                scope.resource.valuesupposed = true;
+                                scope.resource.tooltip = formattedDate;
+                            }
+                    	});
+                    }).error(function(data, status, headers, config) {
+                        errormessage = "Unable to write resource " + scope.resource.path + " for "+ $routeParams.clientId + " : " + status +" "+ data;
+                        dialog.open(errormessage);
+                        console.error(errormessage);
+                    });
+                }
+            });
+
+            $('#writeModal').modal('show');
+        	
+        	
+     /*   	
+        	alert("in Reserve - up");
+        	
+        	
+        	const sqlite3 = require(['sqlite3']).verbose();
+        	 
+        	// open the database
+        	let db = new sqlite3.Database('/home/arunkumar/eclipse-workspace/leshan-master/leshan-server-demo/IoTParking.db', sqlite3.OPEN_READWRITE, (err) => {
+        		alert("n if");
+        		if (err) {
+        	    console.error(err.message);
+        	    
+        	  }
+        	  
+        	  console.log('Connected to the chinook database.');
+        	});
+        	 
+        	db.serialize(() => {
+        	  db.each(`SELECT * FROM IoTParking`, (err, row) => {
+        	    if (err) {
+        	      console.error(err.message);
+        	    }
+        	    console.log(row.id + "\t" + row.name);
+        	  });
+        	});
+        	 
+        	db.close((err) => {
+        	  if (err) {
+        	    console.error(err.message);
+        	  }
+        	  console.log('Close the database connection.');
+        	});
+        	
+     */   	
+        };
 
         // add function to show client
         $scope.showClient = function(client) {
-            $location.path('/clients/' + client.endpoint);
+            $location.path('/client/' + client.endpoint);
         };
 
         // the tooltip message to display for a client (all standard attributes, plus additional ones)
@@ -98,7 +178,7 @@ lwClientControllers.controller('ClientListCtrl', [
             var updateCallback =  function(msg) {
                 $scope.$apply(function() {
                     var client = JSON.parse(msg.data);
-                    $scope.clients = updateClients(client, $scope.clients);
+                    $scope.clients = updateClient(client, $scope.clients);
                 });
             };
 
@@ -152,7 +232,8 @@ lwClientControllers.controller('ClientListCtrl', [
         });
 }]);
 
-lwClientControllers.controller('ClientDetailCtrl', [
+
+parkingSpotControllers.controller('parkingReservationDetailCtrl', [
     '$scope',
     '$location',
     '$routeParams',
@@ -177,6 +258,43 @@ lwClientControllers.controller('ClientDetailCtrl', [
         $scope.settings.single = {format:"TLV"};
 
         $scope.clientId = $routeParams.clientId;
+        
+        $scope.reservedown = function() {
+        	
+        	alert("in Down");
+        	
+        	
+        	const sqlite3 = require(['sqlite3']).verbose();
+        	 
+        	// open the database
+        	let db = new sqlite3.Database('/home/arunkumar/eclipse-workspace/leshan-master/leshan-server-demo/IoTParking.db', sqlite3.OPEN_READWRITE, (err) => {
+        		alert("n if");
+        		if (err) {
+        	    console.error(err.message);
+        	    
+        	  }
+        	  
+        	  console.log('Connected to the chinook database.');
+        	});
+        	 
+        	db.serialize(() => {
+        	  db.each(`SELECT * FROM IoTParking`, (err, row) => {
+        	    if (err) {
+        	      console.error(err.message);
+        	    }
+        	    console.log(row.id + "\t" + row.name);
+        	  });
+        	});
+        	 
+        	db.close((err) => {
+        	  if (err) {
+        	    console.error(err.message);
+        	  }
+        	  console.log('Close the database connection.');
+        	});
+        	
+        	
+        };
 
         // get client details
         $http.get('api/clients/' + $routeParams.clientId)
@@ -282,3 +400,5 @@ lwClientControllers.controller('ClientDetailCtrl', [
             };
         });
     }]);
+
+
