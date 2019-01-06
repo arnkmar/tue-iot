@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,6 +53,11 @@ import org.slf4j.LoggerFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+
+import java.util.Map;
+import java.util.Iterator;
+import java.util.Set;
+
 public class EventServlet extends EventSourceServlet {
 
     private static final String EVENT_DEREGISTRATION = "DEREGISTRATION";
@@ -77,6 +83,8 @@ public class EventServlet extends EventSourceServlet {
     private final Gson gson;
 
     private final CoapMessageTracer coapMessageTracer;
+    
+    HashMap<String, String > parkingLotoccupancyMap = new HashMap< String,String>();
 
     private Set<LeshanEventSource> eventSources = Collections
             .newSetFromMap(new ConcurrentHashMap<LeshanEventSource, Boolean>());
@@ -101,8 +109,10 @@ public class EventServlet extends EventSourceServlet {
             
             
             try {
-				
-				ClientServlet.startObservation(registration,ClientServlet.getResource(registration));
+            	String occupancyValue =ClientServlet.getResource(registration);
+				ClientServlet.startObservation(registration,occupancyValue );
+				parkingLotoccupancyMap.put(registration.getEndpoint(), occupancyValue );
+				mapItr();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -120,6 +130,17 @@ public class EventServlet extends EventSourceServlet {
             System.out.println("updated");
             sendEvent(EVENT_UPDATED, jReg, updatedRegistration.getEndpoint());
         }
+        
+        public void mapItr() {
+            Set set = parkingLotoccupancyMap.entrySet();
+            Iterator iterator = set.iterator();
+            System.out.println("Map Entry Check");
+            while(iterator.hasNext()) {
+               Map.Entry mentry = (Map.Entry)iterator.next();
+               System.out.print("key is: "+ mentry.getKey() + " & Value is: ");
+               System.out.println(mentry.getValue());
+            }
+        }
 
         @Override
         public void unregistered(Registration registration, Collection<Observation> observations, boolean expired,
@@ -128,6 +149,8 @@ public class EventServlet extends EventSourceServlet {
             System.out.println("unregistration");
             try {
 				LeshanServerSQLite.ToSQLDB("OVERVIEW",2,Instant.now().getEpochSecond(),"De-registration",registration.getEndpoint(),null,null,0,null,null );
+				parkingLotoccupancyMap.remove(registration.getEndpoint());
+				mapItr();
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
