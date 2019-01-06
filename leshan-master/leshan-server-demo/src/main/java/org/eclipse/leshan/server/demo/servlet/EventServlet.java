@@ -101,19 +101,22 @@ public class EventServlet extends EventSourceServlet {
                 Collection<Observation> previousObsersations) {
             String jReg = EventServlet.this.gson.toJson(registration);
             System.out.println("registration");
-            System.out.println(jReg );
+            //System.out.println(jReg );
             
         
-            //LeshanServerSQLite.ToSQLDB(1,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),null,null,0,null,null );
+            
             //System.out.println(registration.getObjectLinks());
             //System.out.println(registration.getSortedObjectLinks());
             System.out.println("Registration Done. geTreasource Calling");
             //manager.query_resource_status();
             
             
-            try {
-            	String occupancyValue =ClientServlet.getResource(registration);
+            try { // Get initial values from client and store to database | Also create a map
+            	String occupancyValue =ClientServlet.getResource(registration, 1); // also updates Overview table
 				ClientServlet.startObservation(registration,occupancyValue );
+				LeshanServerSQLite.create(1,registration.getEndpoint()); // table for registration service
+				LeshanServerSQLite.ToSQLDB("IoTParking",1,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),null,null,0,null,null );
+				
 				parkingLotoccupancyMap.put(registration.getEndpoint(), occupancyValue );
 				mapItr();
 			} catch (SQLException e) {
@@ -151,7 +154,8 @@ public class EventServlet extends EventSourceServlet {
             String jReg = EventServlet.this.gson.toJson(registration);
             System.out.println("unregistration");
             try {
-				LeshanServerSQLite.ToSQLDB("OVERVIEW",2,Instant.now().getEpochSecond(),"De-registration",registration.getEndpoint(),null,null,0,null,null );
+				LeshanServerSQLite.ToSQLDB("IoTParking",2,Instant.now().getEpochSecond(),"De-registration",registration.getEndpoint(),null,null,0,null,null );
+				LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"De-Registration",registration.getEndpoint(),null,null,0,null,null);
 				parkingLotoccupancyMap.remove(registration.getEndpoint());
 				mapItr();
 			} catch (SQLException e) {
@@ -196,25 +200,46 @@ public class EventServlet extends EventSourceServlet {
                 String data = new StringBuilder("{\"ep\":\"").append(registration.getEndpoint()).append("\",\"res\":\"")
                         .append(observation.getPath().toString()).append("\",\"val\":")
                         .append(gson.toJson(response.getContent())).append("}").toString();
+                sendEvent(EVENT_NOTIFICATION, data, registration.getEndpoint());
                 System.out.println("Onresponse Obervation");
                 
                // System.out.println(observation.getPath().toString());
                 if(observation.getPath().toString().equals("/32700/0/32801"))
                 {
-                	System.out.println("EventServlet->onResponse-observation : "+response.getContent()+"");
+                	//System.out.println("EventServlet->onResponse-observation : "+response.getContent()+"");
                 	String[] path = StringUtils.split(response.getContent().toString(), ',');
                 	String[] occupancy = StringUtils.split(path[1], '=');
                 	
                 	if(occupancy[1].equals(parkingLotoccupancyMap.get(registration.getEndpoint())))
                 			{
-                        System.out.println("Observation : Resource value - SAME -"+registration.getEndpoint());
-                        System.out.println("Observation :"+occupancy[1]+" "+parkingLotoccupancyMap.get(registration.getEndpoint()));
+                        //System.out.println("Observation : Resource value - SAME -"+registration.getEndpoint());
+                        //System.out.println("Observation :"+occupancy[1]+" "+parkingLotoccupancyMap.get(registration.getEndpoint()));
                 	}
                 	else {
                 		
                 		parkingLotoccupancyMap.replace(registration.getEndpoint(), occupancy[1] );
-                		System.out.println("Observation : Resource value - CNGE -"+registration.getEndpoint());
-                		System.out.println("Observation :"+occupancy[1]+" "+parkingLotoccupancyMap.get(registration.getEndpoint()));
+                		//System.out.println("Observation : Resource value - CNGE -"+registration.getEndpoint());
+                		//System.out.println("Observation :"+occupancy[1]+" "+parkingLotoccupancyMap.get(registration.getEndpoint()));
+                		if(occupancy[1].equals("occupied")) {
+                		try {
+							String carID =ClientServlet.getResource(registration, 2); // get car ID with code 2
+							//System.out.println("Observation CARID:"+carID);
+							LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"CarEntry",registration.getEndpoint(),occupancy[1],carID,0,null,null );
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+                		}
+                		else if(occupancy[1].equals("free"))
+                		{
+                			try {
+								LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"CarExit",registration.getEndpoint(),occupancy[1],null,0,null,null );
+							} catch (SQLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+                		}
+                		
                 	}
                 }
                 		
@@ -222,7 +247,7 @@ public class EventServlet extends EventSourceServlet {
                 
 
 
-              sendEvent(EVENT_NOTIFICATION, data, registration.getEndpoint());
+              
             }
         }
 

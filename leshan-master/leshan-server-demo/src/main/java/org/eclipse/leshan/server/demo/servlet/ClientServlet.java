@@ -197,11 +197,20 @@ public class ClientServlet extends HttpServlet {
         }
     }
     
-    public static String getResource(Registration registration) throws SQLException {
+    public static String getResource(Registration registration, int code) throws SQLException {
+    	
+    	// get Occupancy and CarID 
+    	// If called with registration Code =1 , SQL is updated 
+    	
+    	
+    	//Code = 1 : occupancy return
+    	// code = 2 : carID return 
+    	
     	String target1 = "/32700/0/32801";
     	String target2 = "/32700/0/32802";
     	long TIMEOUT = 5000; // ms
     	try {
+    		
     	ReadRequest request = new ReadRequest(ContentFormat.fromName("JSON"), target1);
     	ReadResponse cResponse = server_static.send(registration, request, TIMEOUT);
     	String[] path = StringUtils.split(cResponse.getContent().toString(), ',');
@@ -216,10 +225,22 @@ public class ClientServlet extends HttpServlet {
 //        System.out.println("test");
 //        }
 //        System.out.println("***************************");
+    	String carID="" ;
+    	if(!occupancy[1].equals("free")) {
     	ReadRequest request2 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
     	ReadResponse cResponse2 = server_static.send(registration, request2, TIMEOUT);
-    	String carID = cResponse2.getContent().toString();
-  
+    	
+    	String[] path2 = StringUtils.split(cResponse2.getContent().toString(), ',');
+    	String[] carIDs = StringUtils.split(path2[1], '=');
+    	carID = carIDs[1];
+    	
+    	if(code==2) {
+			
+			return carID;
+			
+		}
+    	
+    	}
 
 //    	ReadRequest request3 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
 //    	ReadResponse cResponse3 = server_static.send(registration, request2, TIMEOUT);
@@ -229,8 +250,8 @@ public class ClientServlet extends HttpServlet {
     	System.out.println("ClientServlet->getResource-Registration : "+occupancy[1]);
 
     	
-        LeshanServerSQLite.ToSQLDB("OVERVIEW",2,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),occupancy[1],carID,0,null,null );
-        LeshanServerSQLite.create(1,registration.getEndpoint()); // table for registration service
+        LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),occupancy[1],carID,0,null,null);
+        
         return occupancy[1];
     	}
     	catch (RuntimeException | InterruptedException e) {
@@ -320,8 +341,8 @@ public class ClientServlet extends HttpServlet {
         	
         			
         			//for(int i =0 ; i<path.length;i++)
-        	System.out.println(StartTime);
-        	System.out.println(Endtime);
+        	//System.out.println(StartTime);
+        	//System.out.println(Endtime);
         	
         	//To-Do
         	//Check Database for free slots - convert to a string
@@ -330,21 +351,21 @@ public class ClientServlet extends HttpServlet {
         	//String rate= "'{\"id\":\"1\",\"class\":\"3\"}'" ;
         	String rate= LeshanServerSQLite.userToDB(1, StartTime, Endtime);
 //        			"{'id':'pk-1','id':'pk-2'}";
-        	System.out.println(rate);
+        	//System.out.println(rate);
         	processDeviceResponse_user(req, resp, rate);
         	
         	return;
         }
         	
         if(path[0].equals("choice")) {
-        	System.out.println("yes");
+        	//System.out.println("yes");
         	String StartTime = path[1];
         	String Endtime = path[2];       	
         	String TableName = path[3];
         	String carNumber = path[4];
         	
-        	System.out.println(TableName);
-        	System.out.println(carNumber);
+        	//System.out.println(TableName);
+        	//System.out.println(carNumber);
         	Long now = Instant.now().getEpochSecond();
         	String rate= "Reserved" ;
         	
@@ -356,7 +377,7 @@ public class ClientServlet extends HttpServlet {
 			   + "');" ;
 		 		
 			   try {
-				   System.out.println("To insert"+str);
+				   //System.out.println("To insert"+str);
 				LeshanServerSQLite.insert(str);
 				   rate=rate+",ReferenceID,"+Long.toString(now); 
 				processDeviceResponse_user(req, resp, rate);	   
@@ -378,7 +399,7 @@ public class ClientServlet extends HttpServlet {
         
         
         String clientEndpoint = path[0];
-        System.out.println(clientEndpoint);
+       // System.out.println(clientEndpoint);
         
         System.out.println(req);
 
