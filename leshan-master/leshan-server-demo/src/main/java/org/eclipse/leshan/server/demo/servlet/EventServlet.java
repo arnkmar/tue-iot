@@ -27,6 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.californium.core.network.Endpoint;
 import org.eclipse.leshan.core.node.LwM2mNode;
 import org.eclipse.leshan.core.observation.Observation;
@@ -57,6 +58,8 @@ import com.google.gson.GsonBuilder;
 import java.util.Map;
 import java.util.Iterator;
 import java.util.Set;
+
+
 
 public class EventServlet extends EventSourceServlet {
 
@@ -122,7 +125,7 @@ public class EventServlet extends EventSourceServlet {
             
         }
 
-
+        
         @Override
         public void updated(RegistrationUpdate update, Registration updatedRegistration,
                 Registration previousRegistration) {
@@ -195,9 +198,26 @@ public class EventServlet extends EventSourceServlet {
                         .append(gson.toJson(response.getContent())).append("}").toString();
                 System.out.println("Onresponse Obervation");
                 
-                System.out.println(observation.getPath().toString());
+               // System.out.println(observation.getPath().toString());
                 if(observation.getPath().toString().equals("/32700/0/32801"))
-                		System.out.println("EventServlet->onResponse-observation : "+gson.toJson(response.getContent())+"");
+                {
+                	System.out.println("EventServlet->onResponse-observation : "+response.getContent()+"");
+                	String[] path = StringUtils.split(response.getContent().toString(), ',');
+                	String[] occupancy = StringUtils.split(path[1], '=');
+                	
+                	if(occupancy[1].equals(parkingLotoccupancyMap.get(registration.getEndpoint())))
+                			{
+                        System.out.println("Observation : Resource value - SAME -"+registration.getEndpoint());
+                        System.out.println("Observation :"+occupancy[1]+" "+parkingLotoccupancyMap.get(registration.getEndpoint()));
+                	}
+                	else {
+                		
+                		parkingLotoccupancyMap.replace(registration.getEndpoint(), occupancy[1] );
+                		System.out.println("Observation : Resource value - CNGE -"+registration.getEndpoint());
+                		System.out.println("Observation :"+occupancy[1]+" "+parkingLotoccupancyMap.get(registration.getEndpoint()));
+                	}
+                }
+                		
                 
                 
 
