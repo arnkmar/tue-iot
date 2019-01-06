@@ -101,7 +101,8 @@ public class EventServlet extends EventSourceServlet {
             
             
             try {
-				ClientServlet.getResource(registration);
+				
+				ClientServlet.startObservation(registration,ClientServlet.getResource(registration));
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -170,11 +171,15 @@ public class EventServlet extends EventSourceServlet {
                         .append(observation.getPath().toString()).append("\",\"val\":")
                         .append(gson.toJson(response.getContent())).append("}").toString();
                 System.out.println("Onresponse Obervation");
-               
+                
+                System.out.println(observation.getPath().toString());
+                if(observation.getPath().toString().equals("/32700/0/32801"))
+                		System.out.println("EventServlet->onResponse-observation : "+gson.toJson(response.getContent())+"");
+                
                 
 
 
-                sendEvent(EVENT_NOTIFICATION, data, registration.getEndpoint());
+              sendEvent(EVENT_NOTIFICATION, data, registration.getEndpoint());
             }
         }
 

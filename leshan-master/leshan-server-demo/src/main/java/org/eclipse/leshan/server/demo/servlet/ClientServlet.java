@@ -197,14 +197,15 @@ public class ClientServlet extends HttpServlet {
         }
     }
     
-    public static void getResource(Registration registration) throws SQLException {
+    public static String getResource(Registration registration) throws SQLException {
     	String target1 = "/32700/0/32801";
     	String target2 = "/32700/0/32802";
     	long TIMEOUT = 5000; // ms
     	try {
     	ReadRequest request = new ReadRequest(ContentFormat.fromName("JSON"), target1);
     	ReadResponse cResponse = server_static.send(registration, request, TIMEOUT);
-    	String occupancy = cResponse.getContent().toString();
+    	String[] path = StringUtils.split(cResponse.getContent().toString(), ',');
+    	String[] occupancy = StringUtils.split(path[1], '=');
 //    	java.util.List<String> respList = Arrays.asList(str.split(/));
 //        System.out.println("***************************");
 //        System.out.println(request);
@@ -218,20 +219,62 @@ public class ClientServlet extends HttpServlet {
     	ReadRequest request2 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
     	ReadResponse cResponse2 = server_static.send(registration, request2, TIMEOUT);
     	String carID = cResponse2.getContent().toString();
+  
 
 //    	ReadRequest request3 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
 //    	ReadResponse cResponse3 = server_static.send(registration, request2, TIMEOUT);
 //    	String spotID = cResponse3.getContent().toString();    	
-    												
+    				
+    	
+    	System.out.println("ClientServlet->getResource-Registration : "+occupancy[1]);
 
     	
-        LeshanServerSQLite.ToSQLDB("OVERVIEW",2,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),occupancy,carID,0,null,null );
+        LeshanServerSQLite.ToSQLDB("OVERVIEW",2,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),occupancy[1],carID,0,null,null );
         LeshanServerSQLite.create(1,registration.getEndpoint()); // table for registration service
+        return occupancy[1];
     	}
     	catch (RuntimeException | InterruptedException e) {
     		System.out.println(e);
+    		return null;
     	}
     }
+    
+    public static void startObservation(Registration registration, String occupancy) {
+    	
+        
+        String clientEndpoint = null;
+        System.out.println("Client Servlet : StartObservation");
+        System.out.println(occupancy);
+
+        // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
+        if(occupancy!=null)
+            try {
+                String target = "/32700/0/32801";
+                
+                if (registration != null) {
+                    // get content format
+                    
+                    ContentFormat contentFormat = ContentFormat.fromName("JSON");
+                            ;
+
+                    // create & process request
+                    ObserveRequest request = new ObserveRequest(contentFormat, target);
+                    System.out.println(target);
+                    System.out.println(contentFormat);
+                    
+                    ObserveResponse cResponse = server_static.send(registration, request, TIMEOUT);
+                    System.out.println(cResponse);
+   
+                } else {
+                	System.out.println("no registered client with id ");
+                }
+            } catch (RuntimeException | InterruptedException e) {
+            	System.out.println("Exception ClientServlet:startObservation");
+            }
+            return;
+    }    
+    	
+
 
     private void handleException(Exception e, HttpServletResponse resp) throws IOException {
         if (e instanceof InvalidRequestException || e instanceof CodecException
@@ -395,6 +438,9 @@ public class ClientServlet extends HttpServlet {
 
                     // create & process request
                     ObserveRequest request = new ObserveRequest(contentFormat, target);
+                    System.out.println(target);
+                    System.out.println(contentFormat);
+                    
                     ObserveResponse cResponse = server.send(registration, request, TIMEOUT);
                     processDeviceResponse(req, resp, cResponse);
                 } else {
