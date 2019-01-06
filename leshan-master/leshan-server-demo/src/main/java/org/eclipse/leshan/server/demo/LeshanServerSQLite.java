@@ -11,7 +11,7 @@ public class LeshanServerSQLite {
 		      Statement stmt = null;
 		      
 		     String Overview = "CREATE TABLE OVERVIEW ( TIME BIGINT NOT NULL,  EVENT TEXT,PIID TEXT PRIMARY KEY, STATE TEXT, CARNUMBER TEXT);";
-		     String RESERVATION_H24 ="CREATE TABLE RESERVATION (PIID TEXT PRIMARY KEY NOT NULL, H1 TEXT, H2 TEXT, H3 TEXT,H4 TEXT, H5 TEXT, H6 TEXT, H7 TEXT, H8 TEXT, H9 TEXT,H10 TEXT, H11 TEXT, H12 TEXT, H13 TEXT, H14 TEXT, H15 TEXT,H16 TEXT, H17 TEXT, H18 TEXT, H19 TEXT, H20 TEXT, H21 TEXT,H22 TEXT, H23 TEXT, H24 TEXT);";
+		     //String RESERVATION_H24 ="CREATE TABLE RESERVATION (PIID TEXT PRIMARY KEY NOT NULL, H1 TEXT, H2 TEXT, H3 TEXT,H4 TEXT, H5 TEXT, H6 TEXT, H7 TEXT, H8 TEXT, H9 TEXT,H10 TEXT, H11 TEXT, H12 TEXT, H13 TEXT, H14 TEXT, H15 TEXT,H16 TEXT, H17 TEXT, H18 TEXT, H19 TEXT, H20 TEXT, H21 TEXT,H22 TEXT, H23 TEXT, H24 TEXT);";
 		     String RESERVATION_Table_per_ParkingLot = "CREATE TABLE "+tablename+" (TIME BIGINT PRIMARY KEY NOT NULL, RSTART BIGINT, REND BIGINT, RCAR TEXT, PSTART BIGINT, PEND BIGINT, PCAR TEXT, VALID BIGINT);";
 	         String IoTparking_all_events = "CREATE TABLE IoTParking " +
      		 		"(TIME BIGINT PRIMARY KEY   NOT NULL," +
@@ -25,31 +25,28 @@ public class LeshanServerSQLite {
 
 	         String sql = null;
 
-	         System.out.println(RESERVATION_Table_per_ParkingLot);
+	         
 
 		     
 		      try {
 		         Class.forName("org.sqlite.JDBC");
 		         c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 			     if(code == 1)
-			     {
 			    	 sql = RESERVATION_Table_per_ParkingLot;
-			     }
 			     else if(code == 2)
 			    	 sql =Overview;
 			     else if(code == 3)
 			    	 sql =IoTparking_all_events;
-		         
-		         
-		         
-		         
+			     
+			     System.out.println(sql);
+  
 		         System.out.println("Opened database successfully");
 
 		         stmt = c.createStatement();
 		         
 
 
-				         System.out.println(sql);
+		
 		         stmt.executeUpdate(sql);
 		         stmt.close();
 		         c.close();
@@ -71,9 +68,9 @@ public class LeshanServerSQLite {
 		   this.pathToFile=pathToFile;
 		   this.ReservedFor=ReservedFor;
 */		   
-if(code == 1) // iOtpARKING
+if(code == 1) // IoTParking
 {
-			   String str = "INSERT INTO IoTParking (TIME,EVENT,PIID,OCCUPANCY,OCCUPIEDCARNO,CONFIDENCECARNO,PATHTOFILE,RESERVEDFOR) VALUES (" 
+			   String str = "INSERT INTO "+Tablename+" (TIME,EVENT,PIID,OCCUPANCY,OCCUPIEDCARNO,CONFIDENCECARNO,PATHTOFILE,RESERVEDFOR) VALUES (" 
 			   + Long.toString(time)
 			   + ",'"+event
 			   +"','"+ piid
@@ -86,11 +83,11 @@ if(code == 1) // iOtpARKING
 		 		System.out.println(str);
 			   insert(str);
 }			   
-else if (code ==2) // oVERVIEW
+else if (code ==10) // OVERVIEW-TABLE
 {
 	
 	
-	   String str = "INSERT INTO OVERVIEW_3 (TIME, EVENT,PIID , STATE , CARNUMBER ) VALUES (" 
+	   String str = "INSERT INTO "+Tablename+" (TIME, EVENT,PIID , STATE , CARNUMBER ) VALUES (" 
 	   + Long.toString(time)
 	   + ",'"+event
 	   +"','"+ piid
@@ -98,11 +95,11 @@ else if (code ==2) // oVERVIEW
 	   +"','"+OccuCarID
 	   + "');" ;
 		System.out.println(str);
-	   boolean x = insert(str);
+	   boolean success = insert(str);
 	   
-	   if (!x)
+	   if (!success)
 	   {
-		   str = "UPDATE OVERVIEW_3 SET TIME="+ Long.toString(time)
+		   str = "UPDATE "+Tablename+" SET TIME="+ Long.toString(time)
 		   		+",EVENT='"+event
 		   		+"',STATE='"+Occupancy
 		   		+"',CARNUMBER='"+OccuCarID
@@ -115,6 +112,16 @@ else if (code ==2) // oVERVIEW
 	   
 }
 
+else if(code ==30) { // Update Spot table for car exit
+	String sql = "UPDATE "+Tablename+" SET PEND="+ Long.toString(time) +" WHERE PEND IS NULL AND PSTART NOT NULL;";
+	update(sql);
+}
+else if(code ==31) { // Update Spot table for car entry 
+
+	String sql = "insert into "+Tablename+" (time,pstart,pcar) values ("+Long.toString(time)+","+Long.toString(time)+",'"+OccuCarID+"');";
+	insert(sql);
+	System.out.println(sql);
+}
 
 		   
 		   

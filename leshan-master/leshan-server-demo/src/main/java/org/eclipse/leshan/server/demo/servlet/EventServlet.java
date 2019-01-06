@@ -191,7 +191,8 @@ public class EventServlet extends EventSourceServlet {
 
         @Override
         public void onResponse(Observation observation, Registration registration, ObserveResponse response) {
-            if (LOG.isDebugEnabled()) {
+        	long time_now = Instant.now().getEpochSecond();
+        	if (LOG.isDebugEnabled()) {
                 LOG.debug("Received notification from [{}] containing value [{}]", observation.getPath(),
                         response.getContent().toString());
             }
@@ -204,7 +205,8 @@ public class EventServlet extends EventSourceServlet {
                 System.out.println("Onresponse Obervation");
                 
                // System.out.println(observation.getPath().toString());
-                if(observation.getPath().toString().equals("/32700/0/32801"))
+                
+                if(observation.getPath().toString().equals("/32700/0/32801")) // snoop status of parkingSPot occupancy
                 {
                 	//System.out.println("EventServlet->onResponse-observation : "+response.getContent()+"");
                 	String[] path = StringUtils.split(response.getContent().toString(), ',');
@@ -224,7 +226,8 @@ public class EventServlet extends EventSourceServlet {
                 		try {
 							String carID =ClientServlet.getResource(registration, 2); // get car ID with code 2
 							//System.out.println("Observation CARID:"+carID);
-							LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"CarEntry",registration.getEndpoint(),occupancy[1],carID,0,null,null );
+							LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"CarEntry",registration.getEndpoint(),occupancy[1],carID,0,null,null );
+							LeshanServerSQLite.ToSQLDB(registration.getEndpoint(),31,time_now,"CarEntry",registration.getEndpoint(),occupancy[1],carID,0,null,null );
 						} catch (SQLException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -233,7 +236,12 @@ public class EventServlet extends EventSourceServlet {
                 		else if(occupancy[1].equals("free"))
                 		{
                 			try {
-								LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"CarExit",registration.getEndpoint(),occupancy[1],null,0,null,null );
+								LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"CarExit",registration.getEndpoint(),occupancy[1],null,0,null,null );
+								LeshanServerSQLite.ToSQLDB(registration.getEndpoint(),30,time_now,"CarExit",registration.getEndpoint(),occupancy[1],null,0,null,null );
+								
+
+								
+								
 							} catch (SQLException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();

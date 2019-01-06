@@ -246,8 +246,8 @@ public class LeshanServerDemo {
         //LeshanServerSQLite test = new LeshanServerSQLite();
         
 
-        LeshanServerSQLite.create(2,"overview Table creation");
-        LeshanServerSQLite.create(3,"All events recording table");
+        LeshanServerSQLite.create(2,"OVERVIEW");
+        LeshanServerSQLite.create(3,"IoT_All");
        	//LeshanServerSQLite.userToDB(1,6,7);
      
         
