@@ -90,6 +90,8 @@ public class ClientServlet extends HttpServlet {
     private final LwM2mServer server;
     public static LwM2mServer server_static;
     
+    public String Vehicle_req_ID; // to intercept request to PI for validation
+    
 
     private final Gson gson;
 
@@ -337,35 +339,19 @@ public class ClientServlet extends HttpServlet {
         if(path[0].equals("httpQuery")) {
         	System.out.println("yes");
         	int StartTime = Integer.valueOf(path[1]);
-        	int Endtime = Integer.valueOf(path[2]);
-        	
-        			
-        			//for(int i =0 ; i<path.length;i++)
-        	//System.out.println(StartTime);
-        	//System.out.println(Endtime);
-        	
-        	//To-Do
-        	//Check Database for free slots - convert to a string
-        	
-        	
-        	//String rate= "'{\"id\":\"1\",\"class\":\"3\"}'" ;
+        	int Endtime = Integer.valueOf(path[2]);   
         	String rate= LeshanServerSQLite.userToDB(1, StartTime, Endtime);
-//        			"{'id':'pk-1','id':'pk-2'}";
-        	//System.out.println(rate);
         	processDeviceResponse_user(req, resp, rate);
         	
         	return;
         }
         	
         if(path[0].equals("choice")) {
-        	//System.out.println("yes");
         	String StartTime = path[1];
         	String Endtime = path[2];       	
         	String TableName = path[3];
         	String carNumber = path[4];
-        	
-        	//System.out.println(TableName);
-        	//System.out.println(carNumber);
+
         	Long now = Instant.now().getEpochSecond();
         	String rate= "Reserved" ;
         	
@@ -374,8 +360,7 @@ public class ClientServlet extends HttpServlet {
 			   + ",'"+StartTime
 			   +"','"+ Endtime
 			   + "','"+carNumber
-			   + "');" ;
-		 		
+			   + "');" ; 		
 			   try {
 				   //System.out.println("To insert"+str);
 				LeshanServerSQLite.insert(str);
@@ -387,21 +372,11 @@ public class ClientServlet extends HttpServlet {
 				e.printStackTrace();
 			}
         	
-        	//Insert to database
-        	
         	return;
         	
         }
         
-
-        
-        
-        
-        
         String clientEndpoint = path[0];
-       // System.out.println(clientEndpoint);
-        
-        System.out.println(req);
 
         // at least /endpoint/objectId/instanceId
         if (path.length < 3) {
@@ -419,12 +394,20 @@ public class ClientServlet extends HttpServlet {
                 ContentFormat contentFormat = contentFormatParam != null
                         ? ContentFormat.fromName(contentFormatParam.toUpperCase())
                         : null;
-
+                        	
                 // create & process request
                 LwM2mNode node = extractLwM2mNode(target, req);
+               
+//                if(target.equals("/32700/0/32802/")) { // Check for Validity of Vehicle Registration
+//                	 String[] value = StringUtils.split(Vehicle_req_ID, '"');
+//                	System.out.println("test= " +value[5]);
+//                	if(!LeshanServerSQLite.hit(value[5]))
+//                		return;
+//                }
+                
                 WriteRequest request = new WriteRequest(Mode.REPLACE, contentFormat, target, node);
                 WriteResponse cResponse = server.send(registration, request, TIMEOUT);
-                System.out.println(request);
+                
                 processDeviceResponse(req, resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -595,13 +578,35 @@ public class ClientServlet extends HttpServlet {
         }
     }    
     
+    private void user_to_pi_ID_check(String Id, String Value, String target) {
+    	target ="/32700/0/32802";
+    	String content = "{\"id\":32802,\"value\":\"test\"}";
+        LwM2mNode node;
+        try {
+            node = gson.fromJson(content, LwM2mNode.class);
+            System.out.println(node);
+        } catch (JsonSyntaxException e) {
+            throw new InvalidRequestException(e, "unable to parse json to tlv:%s", e.getMessage());
+        }
+        
+        ContentFormat contentFormat = ContentFormat.fromName("JSON");
+        
+        WriteRequest request = new WriteRequest(Mode.REPLACE, contentFormat, target, node);
+        //WriteResponse cResponse = server.send(registration, request, TIMEOUT);
+        
+       // System.out.println(cResponse);
+        
+    }
+    
     private LwM2mNode extractLwM2mNode(String target, HttpServletRequest req) throws IOException {
         String contentType = StringUtils.substringBefore(req.getContentType(), ";");
         if ("application/json".equals(contentType)) {
             String content = IOUtils.toString(req.getInputStream(), req.getCharacterEncoding());
+            Vehicle_req_ID = content; 
             LwM2mNode node;
             try {
                 node = gson.fromJson(content, LwM2mNode.class);
+                System.out.println(node);
             } catch (JsonSyntaxException e) {
                 throw new InvalidRequestException(e, "unable to parse json to tlv:%s", e.getMessage());
             }

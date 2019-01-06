@@ -248,6 +248,7 @@ public class LeshanServerDemo {
 
         LeshanServerSQLite.create(2,"OVERVIEW");
         LeshanServerSQLite.create(3,"IoT_All");
+        LeshanServerSQLite.create(4,"veh-reg");
        	//LeshanServerSQLite.userToDB(1,6,7);
      
         
