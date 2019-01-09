@@ -365,7 +365,7 @@ public class ClientServlet extends HttpServlet {
 			   //if(Integer.valueOf(StartTime) < now+60) {
 			   if(path[5].equals("1")) {
 				   //Write reservationd data to PI
-				   reserveNow(carNumber, ClietName  );
+				   makeReservation(carNumber, ClietName  );
 				   
 				   
 			   }
@@ -592,31 +592,27 @@ public class ClientServlet extends HttpServlet {
         }
     }    
     
-    private void reserveNow (String CarID, String ClientName) {
-    	
-    	
-    	
+    private void makeReservation (String CarID, String ClientName) {
+  	
     	String target ="/32700/0/32801";
     	String content = "{\"id\":32801,\"value\":\"reserved\"}";   	
-    	ServerToPi(target,content,ClientName);
+    	serverWriteToParkingSpot(target,content,ClientName);
     	
     	target ="/32700/0/32802";
     	content = "{\"id\":32802,\"value\":"+CarID+"}";   	
-    	ServerToPi(target,content,ClientName);
+    	serverWriteToParkingSpot(target,content,ClientName);
     	
     }
     
     private void cancelReservation (String ClientName) {
-    	
-    	
-    	
+ 	
     	String target ="/32700/0/32801";
     	String content = "{\"id\":32801,\"value\":\"free\"}";   	
-    	ServerToPi(target,content,ClientName);
+    	serverWriteToParkingSpot(target,content,ClientName);
     	
     }    
     
-    private void ServerToPi(String target,  String content, String ClientName ) { //String Id, String Value, String target) {
+    private void serverWriteToParkingSpot(String target,  String content, String ClientName ) { //String Id, String Value, String target) {
 
         LwM2mNode node;
         try {
