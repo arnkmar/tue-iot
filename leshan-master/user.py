@@ -11,7 +11,7 @@ dt2 = raw_input('Enter Number of hours: ')
 StartTime = int(time.mktime(datetime.datetime.strptime(dt1,"%d/%m/%Y %H:%M:%S").timetuple()))
 End = int(time.mktime(datetime.datetime.strptime(dt2,"%d/%m/%Y %H:%M:%S").timetuple()))
 
-query = "http://192.168.178.39:8080/api/clients/httpQuery/"+str(StartTime)+"/"+str(End)
+query = "http://192.168.178.44:8080/api/clients/httpQuery/"+str(StartTime)+"/"+str(End)
 
 r = requests.put(query)
 availableSpots=r.content.split(",")
@@ -24,6 +24,13 @@ else:
 		if availableSpots[i] != 'null':
 			print str(i)+"    "+availableSpots[i]
 
+
+#toPi = requests.put("http://192.168.178.39:8080/api/clients/LeshanClientDemo/32700/0/32802/",json={'id':32802,'value':'test123'})
+#toPi = requests.put("http://192.168.178.44:8080/api/clients/choice/123/321/LeshanClientDemo/car123",json={'id':32802,'value':'test123'})
+
+#INSERT inTO REGISTERED_VEHICLES (VEHID,LICPLNUM) values ('V2','5678');
+
+
 #response = resp[1:-1]
 #js = json.loads(response)
 
@@ -31,7 +38,7 @@ else:
 Choice =input('Enter SpotID to reserve: ')
 Carnumber =raw_input('Enter Car LicensePlate number: ')
 
-query = "http://192.168.178.39:8080/api/clients/choice/"+str(StartTime)+"/"+str(End)+"/"+str(availableSpots[Choice])+"/"+str(Carnumber)
+query = "http://192.168.178.44:8080/api/clients/choice/"+str(StartTime)+"/"+str(End)+"/"+str(availableSpots[Choice])+"/"+str(Carnumber)
 
 r = requests.put(query)
 print "done"

@@ -20,7 +20,7 @@
 			</Item>
 			<Item ID="32801">
 				<Name>SPOT_STATE</Name>
-				<Operations>R</Operations>
+				<Operations>RW</Operations>
 				<MultipleInstances>Single</MultipleInstances>
 				<Mandatory>Optional</Mandatory>
 				<Type>String</Type>
@@ -30,7 +30,7 @@
 			</Item>
 			<Item ID="32802">
 				<Name>VEHICLE_ID</Name>
-				<Operations>R</Operations>
+				<Operations>RW</Operations>
 				<MultipleInstances>Single</MultipleInstances>
 				<Mandatory>Optional</Mandatory>
 				<Type>String</Type>

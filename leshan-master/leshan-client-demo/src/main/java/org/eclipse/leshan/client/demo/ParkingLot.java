@@ -40,7 +40,7 @@ public class ParkingLot extends BaseInstanceEnabler {
     private boolean RESERVATION=false;
     private String VEHICLE_ID=null;
     private double BILLING_RATE=0.01; 
-
+   
     public ParkingLot() {
     	
         // notify new date each 5 second
@@ -90,7 +90,6 @@ public class ParkingLot extends BaseInstanceEnabler {
         case BILLING_RATE_ID:
         	BILLING_RATE = (double) value.getValue();
             fireResourcesChange(resourceid);
-            
             return WriteResponse.success();
             
         case RESERVATION_ID: 
@@ -110,6 +109,19 @@ public class ParkingLot extends BaseInstanceEnabler {
             return WriteResponse.success();
 
             
+        case VEHICLE: 
+        	String Val1 = (String) value.getValue();
+            VEHICLE_ID =Val1;
+        	fireResourcesChange(resourceid);
+            return WriteResponse.success();
+            
+        case SPOT_STATE_ID: 
+        	String Val2 = (String) value.getValue();
+            PARKING_SPOT_STATE =Val2;
+        	fireResourcesChange(resourceid);
+            return WriteResponse.success();
+           
+            
         default:
             return super.write(resourceid, value);
         }
@@ -126,10 +138,11 @@ public class ParkingLot extends BaseInstanceEnabler {
         if(exists) 
         {
         	PARKING_SPOT_STATE = "occupied";
+        	VEHICLE_ID = "RANDOM";
         	
         }
         else 
-        {
+        {	if(PARKING_SPOT_STATE.equals("occupied"))
         	PARKING_SPOT_STATE = "free";
         	
         }

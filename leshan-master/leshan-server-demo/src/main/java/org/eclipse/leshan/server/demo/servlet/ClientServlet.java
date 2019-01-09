@@ -336,7 +336,7 @@ public class ClientServlet extends HttpServlet {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
         
         
-        if(path[0].equals("httpQuery")) {
+        if(path[0].equals("httpQuery")) { // Check for reservation slot in the requested time and return to the user
         	System.out.println("yes");
         	int StartTime = Integer.valueOf(path[1]);
         	int Endtime = Integer.valueOf(path[2]);   
@@ -346,21 +346,34 @@ public class ClientServlet extends HttpServlet {
         	return;
         }
         	
-        if(path[0].equals("choice")) {
+        if(path[0].equals("choice")) { // Add reservation data to the database
         	String StartTime = path[1];
         	String Endtime = path[2];       	
-        	String TableName = path[3];
+        	String ClietName = path[3];
         	String carNumber = path[4];
 
         	Long now = Instant.now().getEpochSecond();
         	String rate= "Reserved" ;
         	
-			   String str = "INSERT INTO "+ TableName +" (TIME,RSTART,REND,RCAR) VALUES (" 
+			   String str = "INSERT INTO "+ ClietName  +" (TIME,RSTART,REND,RCAR) VALUES (" 
 			   + Long.toString(now)
 			   + ",'"+StartTime
 			   +"','"+ Endtime
 			   + "','"+carNumber
-			   + "');" ; 		
+			   + "');" ; 
+			   
+			   //if(Integer.valueOf(StartTime) < now+60) {
+			   if(true) {
+				   //Write reservationd data to PI
+				   reserveNow(carNumber, ClietName  );
+				   
+				   
+			   }
+			   else {
+				   //Add reservation start to Scheduler
+			   }
+				   
+			   
 			   try {
 				   //System.out.println("To insert"+str);
 				LeshanServerSQLite.insert(str);
@@ -386,7 +399,7 @@ public class ClientServlet extends HttpServlet {
 
         try {
             String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
-            
+            System.out.println("Target in Put - "+target);
             Registration registration = server.getRegistrationService().getByEndpoint(clientEndpoint);
             if (registration != null) {
                 // get content format
@@ -578,9 +591,22 @@ public class ClientServlet extends HttpServlet {
         }
     }    
     
-    private void user_to_pi_ID_check(String Id, String Value, String target) {
+    private void reserveNow (String CarID, String ClientName) {
+    	
+    	
+    	
+    	String target ="/32700/0/32801";
+    	String content = "{\"id\":32801,\"value\":\"reserved\"}";   	
+    	ServerToPi(target,content,ClientName);
+    	
     	target ="/32700/0/32802";
-    	String content = "{\"id\":32802,\"value\":\"test\"}";
+    	content = "{\"id\":32802,\"value\":"+CarID+"}";   	
+    	ServerToPi(target,content,ClientName);
+    	
+    }
+    
+    private void ServerToPi(String target,  String content, String ClientName ) { //String Id, String Value, String target) {
+
         LwM2mNode node;
         try {
             node = gson.fromJson(content, LwM2mNode.class);
@@ -592,11 +618,20 @@ public class ClientServlet extends HttpServlet {
         ContentFormat contentFormat = ContentFormat.fromName("JSON");
         
         WriteRequest request = new WriteRequest(Mode.REPLACE, contentFormat, target, node);
-        //WriteResponse cResponse = server.send(registration, request, TIMEOUT);
+        Registration registration = server.getRegistrationService().getByEndpoint("LeshanClientDemo");
+        try {
+			WriteResponse cResponse = server.send(registration, request, TIMEOUT);
+		} catch (CodecException | InvalidResponseException | RequestCanceledException | RequestRejectedException
+				| ClientSleepingException | InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         
        // System.out.println(cResponse);
         
     }
+    
+
     
     private LwM2mNode extractLwM2mNode(String target, HttpServletRequest req) throws IOException {
         String contentType = StringUtils.substringBefore(req.getContentType(), ";");
