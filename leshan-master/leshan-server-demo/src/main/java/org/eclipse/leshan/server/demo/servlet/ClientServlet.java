@@ -363,7 +363,7 @@ public class ClientServlet extends HttpServlet {
 			   + "');" ; 
 			   
 			   //if(Integer.valueOf(StartTime) < now+60) {
-			   if(true) {
+			   if(path[5].equals("1")) {
 				   //Write reservationd data to PI
 				   reserveNow(carNumber, ClietName  );
 				   
@@ -371,6 +371,7 @@ public class ClientServlet extends HttpServlet {
 			   }
 			   else {
 				   //Add reservation start to Scheduler
+				   cancelReservation(ClietName);
 			   }
 				   
 			   
@@ -604,6 +605,16 @@ public class ClientServlet extends HttpServlet {
     	ServerToPi(target,content,ClientName);
     	
     }
+    
+    private void cancelReservation (String ClientName) {
+    	
+    	
+    	
+    	String target ="/32700/0/32801";
+    	String content = "{\"id\":32801,\"value\":\"free\"}";   	
+    	ServerToPi(target,content,ClientName);
+    	
+    }    
     
     private void ServerToPi(String target,  String content, String ClientName ) { //String Id, String Value, String target) {
 
