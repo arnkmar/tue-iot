@@ -348,16 +348,41 @@ public class ClientServlet extends HttpServlet {
         if(path[0].equals("httpQuery")) { // Check for reservation slot in the requested time and return to the user        	        
 		    // Check for Vehicle Registration		       		       	
 	       	if(LeshanServerSQLite.validateVehicle("REGISTERED_VEHICLES",path[3]).equals("NoReg")) { // Check if the vehicle is registered
-	       		processDeviceResponse_user(req, resp, "Please Register your vehicle first");
+	       		processDeviceResponse_user(req, resp, "0;Please Register your vehicle first");
 	       		return;
 	       	}
         	System.out.println("yes");
         	int StartTime = Integer.valueOf(path[1]);
         	int Endtime = Integer.valueOf(path[2]);   
         	String rate= LeshanServerSQLite.userToDB(1, StartTime, Endtime);
+        	rate = rate + ";"+LeshanServerSQLite.VehicleRecordCheck(path[3]);
         	
         	processDeviceResponse_user(req, resp, rate); 
         	
+        	return;
+        }
+        
+
+        if(path[0].equals("vehicleRegister")) { // Check for reservation slot in the requested time and return to the user        	        		       		       	
+        	try {
+	        		
+	        	String VehicleID = path[1];
+	        	String VehiclePlateNumber = path[2];   
+     	
+			   String str = "INSERT INTO REGISTERED_VEHICLES (TIME,VEHID,LICPLNUM) VALUES (" 
+			   + Long.toString(Instant.now().getEpochSecond())
+			   + ",'"+VehicleID
+			   + "','"+VehiclePlateNumber
+			   + "');" ; 
+
+				if(LeshanServerSQLite.insert(str))  	
+					processDeviceResponse_user(req, resp, "Success");
+				else
+					processDeviceResponse_user(req, resp, "Failed");
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
         	return;
         }
         	
@@ -365,7 +390,7 @@ public class ClientServlet extends HttpServlet {
         	String StartTime = path[1];
         	String Endtime = path[2];       	
         	String ClietName = path[3];
-        	String carNumber = path[4];
+        	String vehicleID = path[4];
 
         	Long now = Instant.now().getEpochSecond();
         	String rate= "Reserved" ;
@@ -374,12 +399,12 @@ public class ClientServlet extends HttpServlet {
 			   + Long.toString(now)
 			   + ",'"+StartTime
 			   +"','"+ Endtime
-			   + "','"+carNumber
+			   + "','"+vehicleID
 			   + "');" ; 
 			   
 
 				   //Add reservation start to Scheduler
-				   manager.addToHash(Integer.valueOf(StartTime), ClietName, carNumber, "Start");
+				   manager.addToHash(Integer.valueOf(StartTime), ClietName, vehicleID, "Start");
 				   manager.addToHash(Integer.valueOf(Endtime), ClietName, null, "End");
 				   
 	

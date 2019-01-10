@@ -13,27 +13,27 @@ StartTime = int(time.mktime(datetime.datetime.strptime(dt1,"%d/%m/%Y %H:%M:%S").
 
 End = int(time.mktime(datetime.datetime.strptime(dt2,"%d/%m/%Y %H:%M:%S").timetuple()))
 '''
-StartTime=int(time.time())+10
-End = StartTime+15
+
 Vehicle_ID = "VEH_1"
-query = "http://192.168.178.44:8080/api/clients/httpQuery/"+str(StartTime)+"/"+str(End)+"/"+str(Vehicle_ID)
-print StartTime
+VehiclePlateNumber = "BCNL134"
+
+query = "http://192.168.178.44:8080/api/clients/vehicleRegister/"+str(Vehicle_ID)+"/"+str(VehiclePlateNumber)
+
 r = requests.put(query)
 
 print r
-print r.content
-response=r.content.split(";")
-print response
-'''
-print response[1]
 
-if response[0]=='0':
+response=r.content
+print response
+
+if response=='Failed':
 	print "Retry"
 	sys.exit(0)
-print "Records :"+response[1]
-'''
-availableSpots=response[0].split(",")
 
+
+
+
+sys.exit(0)
 
 print "SpotID"+"       "+"SpotName"
 if availableSpots[0] == '':
