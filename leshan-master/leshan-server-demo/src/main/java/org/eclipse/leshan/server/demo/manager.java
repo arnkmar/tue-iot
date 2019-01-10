@@ -124,7 +124,8 @@ public class manager {
         System.out.println("Map Entry Check"); 
         System.out.println("Current Time : "+currentTime); 
         long nextKey =0;
-        Set<Long> keys = reservationStartEndList.keySet();       
+        Set<Long> keys = reservationStartEndList.keySet();
+        try {
         for(Long key: keys){
 			System.out.println("Getting Next Schedule : "+key);
 			if(key < currentTime) {
@@ -140,6 +141,11 @@ public class manager {
 				   if(nextKey!=0)
 					   nextKey = key;
 			   }
+        }
+        }
+        catch(Exception e) {
+        	System.out.println("Error : No key to iterate: "+e);
+        	
         }
         if(nextKey-currentTime <= 0)
         	return 5*1000;

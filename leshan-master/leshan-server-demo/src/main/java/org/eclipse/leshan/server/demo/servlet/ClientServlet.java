@@ -622,6 +622,7 @@ public class ClientServlet extends HttpServlet {
     	String content = "{\"id\":32801,\"value\":\"free\"}";   	
     	serverWriteToParkingSpot(target,content,ClientName);
     	
+    	
     }    
     
     private void serverWriteToParkingSpot(String target,  String content, String ClientName ) { //String Id, String Value, String target) {
