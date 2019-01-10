@@ -106,6 +106,15 @@ public class ClientServlet extends HttpServlet {
         gsonBuilder.registerTypeHierarchyAdapter(LwM2mNode.class, new LwM2mNodeDeserializer());
         gsonBuilder.setDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
         this.gson = gsonBuilder.create();
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     /**
@@ -113,8 +122,8 @@ public class ClientServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    	System.out.println("do GET.");
-    	System.out.println(req);
+    	//System.out.println("do GET.");
+    	//System.out.println(req);
         // all registered clients
         if (req.getPathInfo() == null) {
             Collection<Registration> registrations = new ArrayList<>();
@@ -266,8 +275,8 @@ public class ClientServlet extends HttpServlet {
     	
         
         String clientEndpoint = null;
-        System.out.println("Client Servlet : StartObservation");
-        System.out.println(occupancy);
+        //System.out.println("Client Servlet : StartObservation");
+        //System.out.println(occupancy);
 
         // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
         if(occupancy!=null)
@@ -282,11 +291,11 @@ public class ClientServlet extends HttpServlet {
 
                     // create & process request
                     ObserveRequest request = new ObserveRequest(contentFormat, target);
-                    System.out.println(target);
-                    System.out.println(contentFormat);
+                   // System.out.println(target);
+                   // System.out.println(contentFormat);
                     
                     ObserveResponse cResponse = server_static.send(registration, request, TIMEOUT);
-                    System.out.println(cResponse);
+                   // System.out.println(cResponse);
    
                 } else {
                 	System.out.println("no registered client with id ");
@@ -362,16 +371,19 @@ public class ClientServlet extends HttpServlet {
 			   + "','"+carNumber
 			   + "');" ; 
 			   
-			   //if(Integer.valueOf(StartTime) < now+60) {
+			   //if(Integer.valueOf(StartTime) < now+30 && Integer.valueOf(StartTime) > now-30) {
 			   if(path[5].equals("1")) {
 				   //Write reservationd data to PI
-				   makeReservation(carNumber, ClietName  );
+				   markParkingSpotReserved(carNumber, ClietName  );
 				   
 				   
 			   }
 			   else {
 				   //Add reservation start to Scheduler
-				   cancelReservation(ClietName);
+				   manager.addToHash(Integer.valueOf(StartTime), ClietName, carNumber, "Start");
+				   manager.addToHash(Integer.valueOf(Endtime), ClietName, null, "End");
+				   
+				   
 			   }
 				   
 			   
@@ -592,7 +604,7 @@ public class ClientServlet extends HttpServlet {
         }
     }    
     
-    private void makeReservation (String CarID, String ClientName) {
+    public void markParkingSpotReserved (String CarID, String ClientName) {
   	
     	String target ="/32700/0/32801";
     	String content = "{\"id\":32801,\"value\":\"reserved\"}";   	
@@ -604,7 +616,7 @@ public class ClientServlet extends HttpServlet {
     	
     }
     
-    private void cancelReservation (String ClientName) {
+    public void unmarkParkingSpotReserved (String ClientName) {
  	
     	String target ="/32700/0/32801";
     	String content = "{\"id\":32801,\"value\":\"free\"}";   	

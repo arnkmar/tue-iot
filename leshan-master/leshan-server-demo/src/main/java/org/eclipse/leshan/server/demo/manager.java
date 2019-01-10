@@ -5,35 +5,160 @@ import org.eclipse.leshan.core.request.ReadRequest;
 import org.eclipse.leshan.core.response.LwM2mResponse;
 import org.eclipse.leshan.core.response.ReadResponse;
 import org.eclipse.leshan.server.LwM2mServer;
+import org.eclipse.leshan.server.demo.servlet.ClientServlet;
 import org.eclipse.leshan.server.demo.servlet.json.LwM2mNodeDeserializer;
 import org.eclipse.leshan.server.demo.servlet.json.LwM2mNodeSerializer;
 import org.eclipse.leshan.server.demo.servlet.json.RegistrationSerializer;
 import org.eclipse.leshan.server.demo.servlet.json.ResponseSerializer;
 import org.eclipse.leshan.server.registration.Registration;
+
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.TreeSet;
+
 import javax.servlet.http.HttpServlet;
 
 import com.google.gson.GsonBuilder;
 
-public class manager extends HttpServlet{
+public class manager {
 	
 	public Registration newClient;
-	String target = "/3303/0/5700";
+
 	
 	private static final long TIMEOUT = 5000; // ms
-	private final LwM2mServer server;
+	private static LwM2mServer server;
+	private static ClientServlet clientServlet ;
 	
-    public manager(LwM2mServer server) {
-       this. server = server;
+	private static HashMap<Long, List<String>> reservationStartEndList = new HashMap< Long, List<String>>();
+	
+    static Timer timer = new Timer();
+
+    static class Task extends TimerTask {
+        @Override
+        public void run() {
+        	// find a time from HMap that is below 'now'
+        	
+        	// call markReserved
+        	
+        	// find next least time and schedule it
+           //int delay = (5 + new Random().nextInt(5)) * 1000;
+        	
+        	
+        	
+        	updateClientReservationStatus();
+        	int delay = getNextSchedule();
+            timer.schedule(new Task(), delay);
+           // timerTask(Integer.toString(delay));
+            
+            //clientServlet.markParkingSpotReserved("test123","LeshanClientDemo");
+            System.out.println("**********Schedule****************************");
+        }
+
+    }
+    
+	public static void timerTask(String test) {
+		clientServlet.markParkingSpotReserved(test,"LeshanClientDemo");
+		
+	}	
+	
+	public static boolean addToHash(long time, String ClientName, String CarID,String registration) {
+		List<String> list_hashData = new ArrayList<String>();
+		list_hashData.add(ClientName);
+		list_hashData.add(CarID);
+		list_hashData.add(registration);
+		reservationStartEndList.put(time, list_hashData);
+		return true;
+	}
+	
+	public static long updateClientReservationStatus() {
+		Long currentTime =Instant.now().getEpochSecond();
+		SortedSet<Long> keys = new TreeSet<>(reservationStartEndList.keySet());
+		try {
+		for (Long key : keys) { 
+		if(key > currentTime)	
+			return 0;
+		   List<String> value = reservationStartEndList.get(key);
+		   if(value.get(2).equals("Start"))
+			   clientServlet.markParkingSpotReserved(value.get(1),value.get(0));
+		   else if(value.get(2).equals("End"))
+			   clientServlet.unmarkParkingSpotReserved(value.get(1));
+			   
+		   System.out.println("updatingClientReservation : " +key+" "+value.get(0) + "   " + value.get(1)+"   "+value.get(2));
+		  // mapItr();
+		   reservationStartEndList.remove(key);
+		   //mapItr();
+		}
+		}
+		catch (Exception e) {
+			System.out.println("Exception Updating Client : " +e);
+		}
+		
+		
+		
+		return 0;
+		
+	}
+	
+    public static void mapItr() { // to check all data in the hashmap
+        Set set = reservationStartEndList.entrySet();
+        Iterator iterator = set.iterator();
+        System.out.println("Map Entry Check");
+        while(iterator.hasNext()) {
+           Map.Entry mentry = (Map.Entry)iterator.next();
+           System.out.print("key is: "+ mentry.getKey() + " & Value is: ");
+           System.out.println(mentry.getValue());
+        }
+    }	
+    public static int getNextSchedule() {
+        Long currentTime =Instant.now().getEpochSecond();
+        System.out.println("Map Entry Check"); 
+        System.out.println("Current Time : "+currentTime); 
+        long nextKey =0;
+        Set<Long> keys = reservationStartEndList.keySet();       
+        for(Long key: keys){
+			System.out.println("Getting Next Schedule : "+key);
+			if(key < currentTime) {
+				reservationStartEndList.remove(key);
+			continue;
+			}
+			
+			   if(key > nextKey){
+				   if(nextKey==0)
+					   nextKey = key;					 
+			   }
+			   else {
+				   if(nextKey!=0)
+					   nextKey = key;
+			   }
+        }
+        if(nextKey-currentTime <= 0)
+        	return 5*1000;
+        else 
+        	return (int) (nextKey-currentTime)*1000;
+    }
+	
+    public manager(LwM2mServer server, ClientServlet CS) {
+       server = server;
+       clientServlet = CS;
     }
 	
 	
 	public static void manager_init(Registration newClient) {
 		newClient =newClient;
-	}
-
-	public void getname() {
 		
 	}
+
+
 	
 	public static void query_resource_status() {
 //		        

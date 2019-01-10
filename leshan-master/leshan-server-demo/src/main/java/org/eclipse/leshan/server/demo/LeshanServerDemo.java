@@ -251,6 +251,7 @@ public class LeshanServerDemo {
         LeshanServerSQLite.create(4,"veh-reg");
        	//LeshanServerSQLite.userToDB(1,6,7);
      
+       
         
         //LeshanServerSQLite.insert();
         //LeshanServerSQLite.select();
@@ -430,8 +431,9 @@ public class LeshanServerDemo {
         EventServlet eventServlet = new EventServlet(lwServer, lwServer.getSecuredAddress().getPort());
         ServletHolder eventServletHolder = new ServletHolder(eventServlet);
         root.addServlet(eventServletHolder, "/event/*");
-
-        ServletHolder clientServletHolder = new ServletHolder(new ClientServlet(lwServer));
+        
+        ClientServlet CS = new ClientServlet(lwServer);
+        ServletHolder clientServletHolder = new ServletHolder(CS);
         root.addServlet(clientServletHolder, "/api/clients/*");
 
         ServletHolder securityServletHolder = new ServletHolder(new SecurityServlet(securityStore, serverCertificate));
@@ -467,5 +469,9 @@ public class LeshanServerDemo {
         lwServer.start();
         server.start();
         LOG.info("Web server started at {}.", server.getURI());
+        
+        
+        manager m = new manager(lwServer,CS);
+        new manager.Task().run();
     }
 }

@@ -323,109 +323,75 @@ else if(code ==31) { // Update Spot table for car entry
 	   
 	   public static String userToDB (int code, int start, int end ) {
 		   
-		   String ret = null;
+		  String ret = null;
 		   
 		  Connection connection = null;
 		  Statement stmt = null;
-		  try {
-
-		  // Load the MySQL JDBC driver
-		  Class.forName("org.sqlite.JDBC");
-		  // Create a connection to the database
-		  connection = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
-		  System.out.println("Successfully Connected to the database!");
-
 		  
-		  } catch (ClassNotFoundException e) {
+		  try {
+			  // Load the MySQL JDBC driver
+			  Class.forName("org.sqlite.JDBC");
+			  // Create a connection to the database
+			  connection = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
+			  System.out.println("Successfully Connected to the database!");
+			  } 
+			  catch (ClassNotFoundException e) {
+			  System.out.println("Could not find the database driver " + e.getMessage());
+			  } 
+			  catch (SQLException e) {
+			  System.out.println("Could not connect to the database " + e.getMessage());
+			  }
 
-		  System.out.println("Could not find the database driver " + e.getMessage());
-		    } catch (SQLException e) {
-
-		  System.out.println("Could not connect to the database " + e.getMessage());
-		    }
-
-		    try {
-
-		  // Get the database metadata
-
-		  DatabaseMetaData metadata = connection.getMetaData();
-
-
-		  // Specify the type of object; in this case we want tables
-
-		  String[] types = {"TABLE"};
-
-		  ResultSet resultSet = metadata.getTables(null, null, "%", types);
-
-
-		  while (resultSet.next()) {
-			  
-			  
-		    String tableName = resultSet.getString(3);
-		    
-		    System.out.println("Checking table " + tableName );
-
-			   if(code==1) { // check for clashing 
-				   
-//				   String s1 = "H"+Integer.toString(start);
-//				   String s2 = "H"+Integer.toString(start+duration-1);
-//				   System.out.println(s1+"      "+s2);
-					String sql = 
-							//"SELECT  (case when count(*) = 0 then 'false' else 'true' end) as HasOverlappingRooms" + 
-							"SELECT  *" + 
-							" FROM "+tableName+" r " + 
-							" WHERE ("+Integer.toString(start)+" BETWEEN r.RSTART AND r.REND) " + 
-							" OR ("+Integer.toString(end)+" BETWEEN r.RSTART AND r.REND) " + 
-							" OR ("+Integer.toString(start)+" <= r.RSTART AND "+Integer.toString(end)+" >= r.REND);";
-				System.out.println(sql);
-				
-				try {
-					stmt = connection.createStatement();
-					
-				      ResultSet rs = stmt.executeQuery( sql);
-				      System.out.println(rs);
-				      
-				      if ( rs.next() ) { // there is a blocking reservation
-
-
-				         System.out.println("1aa");
-				      }
-				      else { // the spot is available for user's choice
-
-				    	  if(!(tableName.equals("IoTParking")||tableName.equals("OVERVIEW")))
-						    System.out.println("Table : " + tableName );
-				    	  ret = ret +","+ tableName  ;
-				      }
-				      rs.close();
-							
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			   }		    
+		  try {
 	
-
-		  }
-		    } catch (SQLException e) {
+			  // Get the database metadata
+			  DatabaseMetaData metadata = connection.getMetaData();
+			  // Specify the type of object; in this case we want tables
+			  String[] types = {"TABLE"};
+			  ResultSet resultSet = metadata.getTables(null, null, "%", types);
+	
+			  while (resultSet.next()) {			   
+			    String tableName = resultSet.getString(3);   
+			    System.out.println("Checking table " + tableName );
+				   if(code==1) { // check for clashing reservation for user requested time
+					   String sql = 
+							    "SELECT  *" + 
+								" FROM "+tableName+" r " + 
+								" WHERE ("+Integer.toString(start)+" BETWEEN r.RSTART AND r.REND) " + 
+								" OR ("+Integer.toString(end)+" BETWEEN r.RSTART AND r.REND) " + 
+								" OR ("+Integer.toString(start)+" <= r.RSTART AND "+Integer.toString(end)+" >= r.REND);";
+					   System.out.println(sql);			
+						try {
+							stmt = connection.createStatement();	
+						      ResultSet rs = stmt.executeQuery( sql);
+						      System.out.println(rs);
+						      
+						      if ( rs.next() ) { // there is a blocking reservation
+						         System.out.println("there is a blocking reservation");
+						      }
+						      else { // the spot is available for user's choice
+						    	  if(!(tableName.equals("IoTParking")||tableName.equals("OVERVIEW")))
+								    System.out.println("Table : " + tableName );
+						    	  	ret = ret +","+ tableName  ;
+						      }
+						      rs.close();
+									
+						} catch (SQLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					
+				   }		    
+			  }
+		  } 
+		  catch (SQLException e) {
 
 		  System.out.println("Could not get database metadata " + e.getMessage());
-		    }
-		   
-		   
-		   
-		   
-
-		   
+		  }
 		   return ret;
 		   
-		   
-		   
-		   
-		   
 	   }
-	   
-	   
+	      
 }
 
 
