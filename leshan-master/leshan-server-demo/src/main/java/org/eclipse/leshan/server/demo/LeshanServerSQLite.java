@@ -86,7 +86,7 @@ if(code == 1) // IoTParking
 		 		System.out.println(str);
 			   insert(str);
 }			   
-else if (code ==10) // OVERVIEW-TABLE
+else if (code ==10) // OVERVIEW-TABLE // Insert if not update
 {
 	   String str = "INSERT INTO "+Tablename+" (TIME, EVENT,PIID , STATE , CARNUMBER ) VALUES (" 
 	   + Long.toString(time)
@@ -321,6 +321,7 @@ else if(code == 41) { // add new vehicle registrations to DB
 		   
 		  Connection connection = null;
 		  Statement stmt = null;
+		  ResultSet rs = null;
 		  
 		  try {
 			  // Load the MySQL JDBC driver
@@ -356,7 +357,8 @@ else if(code == 41) { // add new vehicle registrations to DB
 								" OR ("+Integer.toString(start)+" <= r.RSTART AND "+Integer.toString(end)+" >= r.REND);";
 					   System.out.println(sql);			
 						try {
-							stmt = connection.createStatement();	
+							/*
+							 stmt = connection.createStatement();	
 						      ResultSet rs = stmt.executeQuery( sql);
 						      System.out.println(rs);
 						      
@@ -369,7 +371,42 @@ else if(code == 41) { // add new vehicle registrations to DB
 						    	  	ret = ret +","+ tableName  ;
 						      }
 						      rs.close();
-									
+						      */
+							
+							stmt = connection.createStatement();	
+						      rs = stmt.executeQuery( sql);
+						      System.out.println(rs);
+						      
+						      if ( rs.next() ) { // there is a blocking reservation
+						         System.out.println("there is a blocking reservation");
+						      }
+						      else { // check if the spot is really a spot and the spot is also active currently.
+						    	  if(!(tableName.equals("IoTParking")||tableName.equals("OVERVIEW"))) 
+								    { //ret = ret +","+ tableName;
+						    		  System.out.println("Table : " + tableName );
+						    		  
+						    		 
+						    		  sql = "SELECT EVENT FROM OVERVIEW where piid = '"+tableName+"';";
+						    		  
+						    		  rs = stmt.executeQuery( sql);
+								      System.out.println(rs);
+								      
+								      if ( rs.next() ) {
+									        
+									         String  Status = rs.getString("EVENT");
+									         System.out.println( "Event = " + Status + "piid = ");
+									         if(!Status.equals("INACTIVE"))
+									        	 ret = ret +","+ tableName;
+									         else
+									         System.out.println("Node Inactive Sorry");
+									      }
+						    		  
+						    	  	  
+						    	  	}
+						      }
+						     
+
+								
 						} catch (SQLException e) {
 							// TODO Auto-generated catch block
 							//e.printStackTrace();
@@ -382,6 +419,16 @@ else if(code == 41) { // add new vehicle registrations to DB
 
 		  System.out.println("Could not get database metadata " + e.getMessage());
 		  }
+	      try {
+			rs.close();
+		      stmt.close();
+		      connection.close();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			System.out.println("Declaration missing for : " + e.getMessage());
+		}
+
 		   return ret;
 		   
 	   }

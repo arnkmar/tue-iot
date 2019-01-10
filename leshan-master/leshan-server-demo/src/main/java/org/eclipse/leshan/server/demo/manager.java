@@ -12,6 +12,7 @@ import org.eclipse.leshan.server.demo.servlet.json.RegistrationSerializer;
 import org.eclipse.leshan.server.demo.servlet.json.ResponseSerializer;
 import org.eclipse.leshan.server.registration.Registration;
 
+import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
@@ -88,11 +89,16 @@ public class manager {
 		if(key > currentTime)	
 			return 0;
 		   List<String> value = reservationStartEndList.get(key);
-		   if(value.get(2).equals("Start"))
+		   if(value.get(2).equals("Start")) {
 			   clientServlet.markParkingSpotReserved(value.get(1),value.get(0));
-		   else if(value.get(2).equals("End"))
+			   							//(String Tablename,int code, long time,String event, String piid, String Occupancy, String OccuCarID, double confidence, String pathToFile, String ReservedFor) throws SQLException 
+			   LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",value.get(0),"reserved",value.get(1),0,null,null);
+		   }
+		   else if(value.get(2).equals("End")) {
 			   clientServlet.unmarkParkingSpotReserved(value.get(1));
-			   
+			   LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",value.get(0),"free",null,0,null,null);
+		   
+		   }
 		   System.out.println("updatingClientReservation : " +key+" "+value.get(0) + "   " + value.get(1)+"   "+value.get(2));
 		  // mapItr();
 		   reservationStartEndList.remove(key);

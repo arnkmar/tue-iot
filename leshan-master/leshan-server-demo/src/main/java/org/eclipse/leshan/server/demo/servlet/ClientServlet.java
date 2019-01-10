@@ -261,7 +261,7 @@ public class ClientServlet extends HttpServlet {
     	System.out.println("ClientServlet->getResource-Registration : "+occupancy[1]);
 
     	
-        LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Registration",registration.getEndpoint(),occupancy[1],carID,0,null,null);
+        LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",registration.getEndpoint(),occupancy[1],carID,0,null,null);
         
         return occupancy[1];
     	}
@@ -355,7 +355,9 @@ public class ClientServlet extends HttpServlet {
         	int StartTime = Integer.valueOf(path[1]);
         	int Endtime = Integer.valueOf(path[2]);   
         	String rate= LeshanServerSQLite.userToDB(1, StartTime, Endtime);
-        	processDeviceResponse_user(req, resp, rate);        	
+        	
+        	processDeviceResponse_user(req, resp, rate); 
+        	
         	return;
         }
         	
@@ -375,23 +377,16 @@ public class ClientServlet extends HttpServlet {
 			   + "','"+carNumber
 			   + "');" ; 
 			   
-			   if(Integer.valueOf(StartTime) < now+30 && Integer.valueOf(StartTime) > now-30) {
-			   //if(path[5].equals("1")) {
-				   //Write reservationd data to PI
-				   markParkingSpotReserved(carNumber, ClietName );
-				   manager.addToHash(Integer.valueOf(Endtime), ClietName, null, "End");				   
-			   }
-			   else {
+
 				   //Add reservation start to Scheduler
 				   manager.addToHash(Integer.valueOf(StartTime), ClietName, carNumber, "Start");
 				   manager.addToHash(Integer.valueOf(Endtime), ClietName, null, "End");
 				   
-				   
-			   }
+	
 				   
 			   
 			   try {
-				   //System.out.println("To insert"+str);
+				   System.out.println("*******------------------------**************************");
 				LeshanServerSQLite.insert(str);
 				   rate=rate+",ReferenceID,"+Long.toString(now); 
 				processDeviceResponse_user(req, resp, rate);	   

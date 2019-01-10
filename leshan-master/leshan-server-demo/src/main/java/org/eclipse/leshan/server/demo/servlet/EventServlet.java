@@ -155,7 +155,7 @@ public class EventServlet extends EventSourceServlet {
             System.out.println("unregistration");
             try {
 				LeshanServerSQLite.ToSQLDB("IoTParking",2,Instant.now().getEpochSecond(),"De-registration",registration.getEndpoint(),null,null,0,null,null );
-				LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"De-Registration",registration.getEndpoint(),null,null,0,null,null);
+				LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"INACTIVE",registration.getEndpoint(),null,null,0,null,null);
 				parkingLotoccupancyMap.remove(registration.getEndpoint());
 				mapItr();
 			} catch (SQLException e) {
@@ -226,7 +226,7 @@ public class EventServlet extends EventSourceServlet {
                 		try {
 							String carID =ClientServlet.getResource(registration, 2); // get car ID with code 2
 							//System.out.println("Observation CARID:"+carID);
-							LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"CarEntry",registration.getEndpoint(),occupancy[1],carID,0,null,null );
+							LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"Active",registration.getEndpoint(),occupancy[1],carID,0,null,null );
 							LeshanServerSQLite.ToSQLDB(registration.getEndpoint(),31,time_now,"CarEntry",registration.getEndpoint(),occupancy[1],carID,0,null,null );
 						} catch (SQLException e) {
 							// TODO Auto-generated catch block
@@ -236,7 +236,7 @@ public class EventServlet extends EventSourceServlet {
                 		else if(occupancy[1].equals("free"))
                 		{
                 			try {
-								LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"CarExit",registration.getEndpoint(),occupancy[1],null,0,null,null );
+								LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"Active",registration.getEndpoint(),occupancy[1],null,0,null,null );
 								LeshanServerSQLite.ToSQLDB(registration.getEndpoint(),30,time_now,"CarExit",registration.getEndpoint(),occupancy[1],null,0,null,null );
 								
 
