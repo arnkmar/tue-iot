@@ -345,13 +345,17 @@ public class ClientServlet extends HttpServlet {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
         
         
-        if(path[0].equals("httpQuery")) { // Check for reservation slot in the requested time and return to the user
+        if(path[0].equals("httpQuery")) { // Check for reservation slot in the requested time and return to the user        	        
+		    // Check for Vehicle Registration		       		       	
+	       	if(LeshanServerSQLite.validateVehicle("REGISTERED_VEHICLES",path[3]).equals("NoReg")) { // Check if the vehicle is registered
+	       		processDeviceResponse_user(req, resp, "Please Register your vehicle first");
+	       		return;
+	       	}
         	System.out.println("yes");
         	int StartTime = Integer.valueOf(path[1]);
         	int Endtime = Integer.valueOf(path[2]);   
         	String rate= LeshanServerSQLite.userToDB(1, StartTime, Endtime);
-        	processDeviceResponse_user(req, resp, rate);
-        	
+        	processDeviceResponse_user(req, resp, rate);        	
         	return;
         }
         	
@@ -371,12 +375,11 @@ public class ClientServlet extends HttpServlet {
 			   + "','"+carNumber
 			   + "');" ; 
 			   
-			   //if(Integer.valueOf(StartTime) < now+30 && Integer.valueOf(StartTime) > now-30) {
-			   if(path[5].equals("1")) {
+			   if(Integer.valueOf(StartTime) < now+30 && Integer.valueOf(StartTime) > now-30) {
+			   //if(path[5].equals("1")) {
 				   //Write reservationd data to PI
-				   markParkingSpotReserved(carNumber, ClietName  );
-				   
-				   
+				   markParkingSpotReserved(carNumber, ClietName );
+				   manager.addToHash(Integer.valueOf(Endtime), ClietName, null, "End");				   
 			   }
 			   else {
 				   //Add reservation start to Scheduler
@@ -423,13 +426,6 @@ public class ClientServlet extends HttpServlet {
                         	
                 // create & process request
                 LwM2mNode node = extractLwM2mNode(target, req);
-               
-//                if(target.equals("/32700/0/32802/")) { // Check for Validity of Vehicle Registration
-//                	 String[] value = StringUtils.split(Vehicle_req_ID, '"');
-//                	System.out.println("test= " +value[5]);
-//                	if(!LeshanServerSQLite.hit(value[5]))
-//                		return;
-//                }
                 
                 WriteRequest request = new WriteRequest(Mode.REPLACE, contentFormat, target, node);
                 WriteResponse cResponse = server.send(registration, request, TIMEOUT);
