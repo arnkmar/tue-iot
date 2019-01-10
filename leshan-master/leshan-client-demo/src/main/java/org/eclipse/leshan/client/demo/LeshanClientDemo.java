@@ -19,6 +19,9 @@
 package org.eclipse.leshan.client.demo;
 
 import static org.eclipse.leshan.LwM2mId.*;
+
+// For IoT Parking Spot 
+// 
 import static org.eclipse.leshan.client.object.Security.*;
 
 import java.io.File;
