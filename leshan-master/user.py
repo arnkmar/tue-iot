@@ -13,8 +13,8 @@ StartTime = int(time.mktime(datetime.datetime.strptime(dt1,"%d/%m/%Y %H:%M:%S").
 
 End = int(time.mktime(datetime.datetime.strptime(dt2,"%d/%m/%Y %H:%M:%S").timetuple()))
 '''
-StartTime=int(time.time())+10
-End = StartTime+15
+StartTime=int(time.time())+5
+End = StartTime+30
 Vehicle_ID = "VEH_1"
 query = "http://192.168.178.44:8080/api/clients/httpQuery/"+str(StartTime)+"/"+str(End)+"/"+str(Vehicle_ID)
 print StartTime
@@ -56,8 +56,8 @@ else:
 
 Choice =input('Enter SpotID to reserve: ')
 #Carnumber =raw_input('Enter Car LicensePlate number: ')
-Carnumber = 'VEH_1'
-query = "http://192.168.178.44:8080/api/clients/choice/"+str(StartTime)+"/"+str(End)+"/"+str(availableSpots[Choice])+"/"+str(Carnumber)
+
+query = "http://192.168.178.44:8080/api/clients/choice/"+str(StartTime)+"/"+str(End)+"/"+str(availableSpots[Choice])+"/"+str(Vehicle_ID)
 
 r = requests.put(query)
 print "done"

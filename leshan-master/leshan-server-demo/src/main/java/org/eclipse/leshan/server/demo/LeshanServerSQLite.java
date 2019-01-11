@@ -10,8 +10,8 @@ public class LeshanServerSQLite {
 		      Connection c = null;
 		      Statement stmt = null;
 		      tablename = "["+tablename+"]";
-		     String VehicleReg = "CREATE TABLE REGISTERED_VEHICLES (TIME BIGINT, VEHID TEXT, LICPLNUM TEXT, CRIMNL_RECD TEXT, DUES TEXT, COMMENTS TEXT);"; 
-		     String Overview = "CREATE TABLE OVERVIEW ( TIME BIGINT NOT NULL,  EVENT TEXT,PIID TEXT PRIMARY KEY, STATE TEXT, CARNUMBER TEXT);";
+		     String VehicleReg = "CREATE TABLE REGISTERED_VEHICLES (TIME BIGINT, VEHID TEXT PRIMARY KEY NOT NULL, LICPLNUM TEXT, CRIMNL_RECD TEXT, DUES TEXT, COMMENTS TEXT);"; 
+		     String Overview = "CREATE TABLE OVERVIEW ( TIME BIGINT NOT NULL,  STATUS TEXT,PIID TEXT PRIMARY KEY, STATE TEXT, CARNUMBER TEXT, PVALIDITY TEXT);";
 		     //String RESERVATION_H24 ="CREATE TABLE RESERVATION (PIID TEXT PRIMARY KEY NOT NULL, H1 TEXT, H2 TEXT, H3 TEXT,H4 TEXT, H5 TEXT, H6 TEXT, H7 TEXT, H8 TEXT, H9 TEXT,H10 TEXT, H11 TEXT, H12 TEXT, H13 TEXT, H14 TEXT, H15 TEXT,H16 TEXT, H17 TEXT, H18 TEXT, H19 TEXT, H20 TEXT, H21 TEXT,H22 TEXT, H23 TEXT, H24 TEXT);";
 		     String RESERVATION_Table_per_ParkingLot = "CREATE TABLE "+tablename+" (TIME BIGINT PRIMARY KEY NOT NULL, RSTART BIGINT, REND BIGINT, RCAR TEXT, PSTART BIGINT, PEND BIGINT, PCAR TEXT, VALID BIGINT);";
 	         String IoTparking_all_events = "CREATE TABLE IoTParking " +
@@ -62,87 +62,147 @@ public class LeshanServerSQLite {
 		   }
 	   
 	   public static void ToSQLDB(String Tablename,int code, long time,String event, String piid, String Occupancy, String OccuCarID, double confidence, String pathToFile, String ReservedFor) throws SQLException {
-/*		   
-		   this.time = time;
-		   this.piid=piid;
-		   this.Occupany=Occupancy;
-		   this.OccuCarID=OccuCarID;
-		   this.confidence=confidence;
-		   this.pathToFile=pathToFile;
-		   this.ReservedFor=ReservedFor;
+	   
+			String Tablename_ = "["+Tablename+"]";
+			String sql;
+			if(code == 1) // IoTParking
+			{
+						   String str = "INSERT INTO "+Tablename_+" (TIME,EVENT,PIID,OCCUPANCY,OCCUPIEDCARNO,CONFIDENCECARNO,PATHTOFILE,RESERVEDFOR) VALUES (" 
+						   + Long.toString(time)
+						   + ",'"+event
+						   +"','"+ piid
+						   + "','"+Occupancy
+						   +"','"+OccuCarID
+						   +"',"+ Double.toString(confidence)
+						   +",'"+pathToFile
+						   +"','"+ReservedFor
+						   + "');" ;
+					 		//System.out.println(str);
+						   insert(str);
+			}			   
+			else if (code ==10) // OVERVIEW-TABLE // Insert if not update
+			{		
+				   String str = "INSERT INTO "+Tablename_+" (TIME, STATUS,PIID , STATE , CARNUMBER  ) VALUES (" 
+				   + Long.toString(time)
+				   + ",'"+event
+				   +"','"+ piid
+				   + "','"+Occupancy
+				   +"','"+OccuCarID
+				   
+				   + "');" ;
+					//System.out.println(str);
+				   boolean success = insert(str);	   
+				   if (!success)
+				   {	//System.out.println("Attempting Update Operation");
+					   str = "UPDATE "+Tablename_+" SET TIME="+ Long.toString(time)
+					   		+",STATUS='"+event
+					   		+"',STATE='"+Occupancy
+					   		+"',CARNUMBER='"+OccuCarID
+					   		+"',PVALIDITY='"
+					   		+"' WHERE PIID='"+piid
+					   		+ "';" ;
+								//System.out.println(str);
+							   update(str);
+				   }
+				   
+				   
+			}
+			
+			else if(code ==30) { // Update Spot table for car exit
+				sql = "UPDATE "+Tablename_+" SET PEND="+ Long.toString(time) +" WHERE PEND IS NULL AND PSTART NOT NULL;";
+				update(sql);
+			}
+			else if(code ==31) { // Update Spot table for car entry | Also validate if there is a reservation ?
+				
+				ReservedFor = checkForReservation(Tablename_, time,0);
+				
+				if(ReservedFor==null)	{		
+				sql = "insert into "+Tablename_+" (time,pstart,pcar) values ("+Long.toString(time)+","+Long.toString(time)+",'"+OccuCarID+"');";
+				insert(sql);
+				}
+				else {
+					String ReservedAt = checkForReservation(Tablename_, time,1);
+					if(!ReservedFor.equals(OccuCarID)) {
+						
+						 System.out.println("Wrong car is in");
+						 sql = "UPDATE OVERVIEW SET PVALIDITY='INVALID' WHERE PIID IS '"+Tablename+"';";
+						 //System.out.println(sql);
+						insert (sql);
+						
+						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=0,PSTART="+Long.toString(time)+" WHERE TIME="+ReservedAt+";";
+						//System.out.println(sql);
+						insert (sql);
+						
+						
+					}
+					else {
+						System.out.println("Correct car is in"); 
+						sql = "UPDATE OVERVIEW SET PVALIDITY='VALID' WHERE PIID IS '"+Tablename+"';";
+						//System.out.println(sql);
+						insert (sql);
+						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=1,PSTART="+Long.toString(time)+" WHERE TIME="+ReservedAt+";";
+						//System.out.println(sql);
+						insert (sql);
+					}
+					
+					
+					insert(sql);
+					
+				}
+				//System.out.println(sql);
+			}
+			else if(code == 41) { // add new vehicle registrations to DB 
+				
+				sql = "INSERT INTO "+Tablename_+" (TIME, VEHID,LICPLNUM) VALUES (1,'VEH_1','LICENSE123');";
+			
+				
+			}
 		   
-		   
-*/		   
-		   Tablename = "["+Tablename+"]";
-if(code == 1) // IoTParking
-{
-			   String str = "INSERT INTO "+Tablename+" (TIME,EVENT,PIID,OCCUPANCY,OCCUPIEDCARNO,CONFIDENCECARNO,PATHTOFILE,RESERVEDFOR) VALUES (" 
-			   + Long.toString(time)
-			   + ",'"+event
-			   +"','"+ piid
-			   + "','"+Occupancy
-			   +"','"+OccuCarID
-			   +"',"+ Double.toString(confidence)
-			   +",'"+pathToFile
-			   +"','"+ReservedFor
-			   + "');" ;
-		 		//System.out.println(str);
-			   insert(str);
-}			   
-else if (code ==10) // OVERVIEW-TABLE // Insert if not update
-{		
-	   String str = "INSERT INTO "+Tablename+" (TIME, EVENT,PIID , STATE , CARNUMBER ) VALUES (" 
-	   + Long.toString(time)
-	   + ",'"+event
-	   +"','"+ piid
-	   + "','"+Occupancy
-	   +"','"+OccuCarID
-	   + "');" ;
-		System.out.println(str);
-	   boolean success = insert(str);	   
-	   if (!success)
-	   {	//System.out.println("Attempting Update Operation");
-		   str = "UPDATE "+Tablename+" SET TIME="+ Long.toString(time)
-		   		+",EVENT='"+event
-		   		+"',STATE='"+Occupancy
-		   		+"',CARNUMBER='"+OccuCarID
-		   		+"' WHERE PIID='"+piid
-		   		+ "';" ;
-					System.out.println(str);
-				   update(str);
 	   }
 	   
-	   
-}
-
-else if(code ==30) { // Update Spot table for car exit
-	String sql = "UPDATE "+Tablename+" SET PEND="+ Long.toString(time) +" WHERE PEND IS NULL AND PSTART NOT NULL;";
-	update(sql);
-}
-else if(code ==31) { // Update Spot table for car entry 
-
-	String sql = "insert into "+Tablename+" (time,pstart,pcar) values ("+Long.toString(time)+","+Long.toString(time)+",'"+OccuCarID+"');";
-	insert(sql);
-	//System.out.println(sql);
-}
-else if(code == 41) { // add new vehicle registrations to DB 
-	
-	String sql = "INSERT INTO "+Tablename+" (TIME, VEHID,LICPLNUM) VALUES (1,'VEH_1','LICENSE123');";
-
-	
-}
-
-
-		   
-		   
-		   
-		   
-		   
-	   }
-	   
 
 	   
-	   public static boolean insert(String sql) throws SQLException {
+	   private static String checkForReservation(String tablename, long carEntryTime, int code ) {
+		   
+   
+		// TODO Auto-generated method stub
+		   
+		   Connection c = null;
+		   Statement stmt = null;
+		   String resp = null;
+		   ResultSet rs ;
+		   
+		   try {
+		      Class.forName("org.sqlite.JDBC");
+		      c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
+		      c.setAutoCommit(false);
+		      //System.out.println("Opened database successfully");
+		      stmt = c.createStatement();		      
+			   String sql = 
+					    "SELECT  *" + 
+						" FROM "+tablename+" r " + 
+						" WHERE ("+Long.toString(carEntryTime)+" BETWEEN r.RSTART AND r.REND) ;" ;
+		      rs = stmt.executeQuery( sql);
+		      	      
+		      while ( rs.next() ) {   
+		    	  if(code ==0)
+		    		  resp = rs.getString("RCAR");
+		    	  else if(code ==1)
+		    		  resp = rs.getString("TIME");
+		      }		      
+				rs.close();
+				stmt.close();
+			    c.close();
+		   } catch ( Exception e ) {
+		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+
+		      return resp;
+		   }
+		   //System.out.println("Operation-SELECT done successfully");
+		return resp;
+	}
+
+	public static boolean insert(String sql) throws SQLException {
 		      Connection c = null;
 		      Statement stmt = null;
 		      
@@ -150,31 +210,19 @@ else if(code == 41) { // add new vehicle registrations to DB
 		         Class.forName("org.sqlite.JDBC");
 		         c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 		         c.setAutoCommit(false);
-		         System.out.println("Opened database successfully");
+		         //System.out.println("Opened database successfully");
 
 		         stmt = c.createStatement(); 
-//		         stmt.executeUpdate(sql);
-
-//		         String sql = "INSERT INTO COMPANY (ID,NAME,AGE,ADDRESS,SALARY) " +
-	                        //"VALUES (1, 'Paul', 325, 'California', 200500.00 );"; 
-
-	                        stmt.executeUpdate(sql);
-
-
-		         
+                 stmt.executeUpdate(sql);
 		         stmt.close();
 		         c.commit();
 		         c.close();
 		      } catch ( Exception e ) {
 		         System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 		         if (e.getMessage().contains("UNIQUE constraint failed:")) 
-		         {  stmt.close(); c.close(); return false;  }
-		         
-		         
-		         
-		         
+		         {  stmt.close(); c.close(); return false;  }   
 		      }
-		      System.out.println("Records created successfully");
+		      //System.out.println("Records created successfully");
 		      return true;
 		   }
 	   
@@ -186,7 +234,7 @@ else if(code == 41) { // add new vehicle registrations to DB
 		      Class.forName("org.sqlite.JDBC");
 		      c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 		      c.setAutoCommit(false);
-		      System.out.println("Opened database successfully");
+		      //System.out.println("Opened database successfully");
 
 		      stmt = c.createStatement();
 		      ResultSet rs = stmt.executeQuery( "SELECT * FROM IoTParking;" );
@@ -196,10 +244,10 @@ else if(code == 41) { // add new vehicle registrations to DB
 		         String  piid = rs.getString("piid");
 
 		         
-		         System.out.println( "ID = " + time );
-		         System.out.println( "NAME = " + piid );
+		        // System.out.println( "ID = " + time );
+		        // System.out.println( "NAME = " + piid );
 
-		         System.out.println();
+		         //System.out.println();
 		      }
 		      rs.close();
 		      stmt.close();
@@ -208,7 +256,7 @@ else if(code == 41) { // add new vehicle registrations to DB
 		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
 		      System.exit(0);
 		   }
-		   System.out.println("Operation-SELECT done successfully");
+		  // System.out.println("Operation-SELECT done successfully");
 		  }
 	   
 	   public static String validateVehicle(String TableName, String ID) {
@@ -411,22 +459,7 @@ else if(code == 41) { // add new vehicle registrations to DB
 								" OR ("+Integer.toString(start)+" <= r.RSTART AND "+Integer.toString(end)+" >= r.REND);";
 					   //System.out.println(sql);			
 						try {
-							/*
-							 stmt = connection.createStatement();	
-						      ResultSet rs = stmt.executeQuery( sql);
-						      System.out.println(rs);
-						      
-						      if ( rs.next() ) { // there is a blocking reservation
-						         System.out.println("there is a blocking reservation");
-						      }
-						      else { // the spot is available for user's choice
-						    	  if(!(tableName.equals("IoTParking")||tableName.equals("OVERVIEW")))
-								    System.out.println("Table : " + tableName );
-						    	  	ret = ret +","+ tableName  ;
-						      }
-						      rs.close();
-						      */
-							
+					
 							stmt = connection.createStatement();	
 						      rs = stmt.executeQuery( sql);
 						      //System.out.println(rs);
@@ -440,14 +473,14 @@ else if(code == 41) { // add new vehicle registrations to DB
 						    		  //System.out.println("Table : " + tableName );
 						    		  
 						    		 
-						    		  sql = "SELECT EVENT FROM OVERVIEW where piid = '"+tableName+"';";
+						    		  sql = "SELECT STATUS FROM OVERVIEW where piid = '"+tableName+"';";
 						    		  
 						    		  rs = stmt.executeQuery( sql);
 								      System.out.println(rs);
 								      
 								      if ( rs.next() ) {
 									        
-									         String  Status = rs.getString("EVENT");
+									         String  Status = rs.getString("STATUS");
 									         System.out.println( "Event = " + Status + "piid = ");
 									         if(!Status.equals("INACTIVE"))
 									        	 ret = ret +","+ tableName;

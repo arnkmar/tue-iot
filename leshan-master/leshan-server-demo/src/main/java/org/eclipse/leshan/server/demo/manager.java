@@ -62,7 +62,7 @@ public class manager {
            // timerTask(Integer.toString(delay));
             
             //clientServlet.markParkingSpotReserved("test123","LeshanClientDemo");
-            System.out.println("**********Schedule****************************");
+           // System.out.println("********************************************Schedule****************************");
         }
 
     }
@@ -90,13 +90,13 @@ public class manager {
 			return 0;
 		   List<String> value = reservationStartEndList.get(key);
 		   if(value.get(2).equals("Start")) {
-			   System.out.println("*******------------------------************************** START VALUE:  " +value.get(2)); 
+			  // System.out.println("*******------------------------************************** START VALUE:  " +value.get(2)); 
 			   clientServlet.markParkingSpotReserved(value.get(1),value.get(0));
 			   
 			   LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",value.get(0),"reserved",value.get(1),0,null,null);
 		   }
 		   else if(value.get(2).equals("End")) {
-			   System.out.println("*******------------------------************************** END VALUE:  " +value.get(2));
+			   //System.out.println("*******------------------------************************** END VALUE:  " +value.get(2));
 			   clientServlet.unmarkParkingSpotReserved(value.get(0));
 			   
 			   LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",value.get(0),"free",null,0,null,null);
