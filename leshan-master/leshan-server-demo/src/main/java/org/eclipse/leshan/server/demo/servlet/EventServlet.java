@@ -155,7 +155,7 @@ public class EventServlet extends EventSourceServlet {
             System.out.println("unregistration");
             try {
 				LeshanServerSQLite.ToSQLDB("IoTParking",2,Instant.now().getEpochSecond(),"De-registration",registration.getEndpoint(),null,null,0,null,null );
-				LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"INACTIVE",registration.getEndpoint(),null,null,0,null,null);
+				
 				parkingLotoccupancyMap.remove(registration.getEndpoint());
 				mapItr();
 			} catch (SQLException e) {

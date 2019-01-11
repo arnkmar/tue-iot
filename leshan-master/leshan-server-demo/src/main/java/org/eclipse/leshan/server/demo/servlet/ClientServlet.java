@@ -662,6 +662,7 @@ public class ClientServlet extends HttpServlet {
 				| ClientSleepingException | InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			
 		}
         
        // System.out.println(cResponse);
