@@ -90,12 +90,15 @@ public class manager {
 			return 0;
 		   List<String> value = reservationStartEndList.get(key);
 		   if(value.get(2).equals("Start")) {
+			   System.out.println("*******------------------------************************** START VALUE:  " +value.get(2)); 
 			   clientServlet.markParkingSpotReserved(value.get(1),value.get(0));
-			   							//(String Tablename,int code, long time,String event, String piid, String Occupancy, String OccuCarID, double confidence, String pathToFile, String ReservedFor) throws SQLException 
+			   
 			   LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",value.get(0),"reserved",value.get(1),0,null,null);
 		   }
 		   else if(value.get(2).equals("End")) {
-			   clientServlet.unmarkParkingSpotReserved(value.get(1));
+			   System.out.println("*******------------------------************************** END VALUE:  " +value.get(2));
+			   clientServlet.unmarkParkingSpotReserved(value.get(0));
+			   
 			   LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",value.get(0),"free",null,0,null,null);
 		   
 		   }
@@ -127,13 +130,13 @@ public class manager {
     }	
     public static int getNextSchedule() {
         Long currentTime =Instant.now().getEpochSecond();
-        System.out.println("Map Entry Check"); 
+        //System.out.println("Map Entry Check"); 
         System.out.println("Current Time : "+currentTime); 
         long nextKey =0;
         Set<Long> keys = reservationStartEndList.keySet();
         try {
         for(Long key: keys){
-			System.out.println("Getting Next Schedule : "+key);
+			//System.out.println("Getting Next Schedule : "+key);
 			if(key < currentTime) {
 				reservationStartEndList.remove(key);
 			continue;
@@ -154,7 +157,7 @@ public class manager {
         	
         }
         if(nextKey-currentTime <= 0)
-        	return 5*1000;
+        	return 10*1000;
         else 
         	return (int) (nextKey-currentTime)*1000;
     }

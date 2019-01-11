@@ -395,7 +395,7 @@ public class ClientServlet extends HttpServlet {
         	Long now = Instant.now().getEpochSecond();
         	String rate= "Reserved" ;
         	
-			   String str = "INSERT INTO "+ ClietName  +" (TIME,RSTART,REND,RCAR) VALUES (" 
+			   String str = "INSERT INTO ["+ ClietName  +"] (TIME,RSTART,REND,RCAR) VALUES (" 
 			   + Long.toString(now)
 			   + ",'"+StartTime
 			   +"','"+ Endtime
@@ -622,6 +622,7 @@ public class ClientServlet extends HttpServlet {
     
     public void markParkingSpotReserved (String CarID, String ClientName) {
   	
+    	System.out.println("*******------------------------************************** ClientName " + ClientName);
     	String target ="/32700/0/32801";
     	String content = "{\"id\":32801,\"value\":\"reserved\"}";   	
     	serverWriteToParkingSpot(target,content,ClientName);
@@ -654,7 +655,7 @@ public class ClientServlet extends HttpServlet {
         ContentFormat contentFormat = ContentFormat.fromName("JSON");
         
         WriteRequest request = new WriteRequest(Mode.REPLACE, contentFormat, target, node);
-        Registration registration = server.getRegistrationService().getByEndpoint("LeshanClientDemo");
+        Registration registration = server.getRegistrationService().getByEndpoint(ClientName);
         try {
 			WriteResponse cResponse = server.send(registration, request, TIMEOUT);
 		} catch (CodecException | InvalidResponseException | RequestCanceledException | RequestRejectedException

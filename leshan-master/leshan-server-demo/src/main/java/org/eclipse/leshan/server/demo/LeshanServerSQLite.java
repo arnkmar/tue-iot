@@ -9,7 +9,7 @@ public class LeshanServerSQLite {
 	   public static void create(int code, String tablename) {
 		      Connection c = null;
 		      Statement stmt = null;
-		      
+		      tablename = "["+tablename+"]";
 		     String VehicleReg = "CREATE TABLE REGISTERED_VEHICLES (TIME BIGINT, VEHID TEXT, LICPLNUM TEXT, CRIMNL_RECD TEXT, DUES TEXT, COMMENTS TEXT);"; 
 		     String Overview = "CREATE TABLE OVERVIEW ( TIME BIGINT NOT NULL,  EVENT TEXT,PIID TEXT PRIMARY KEY, STATE TEXT, CARNUMBER TEXT);";
 		     //String RESERVATION_H24 ="CREATE TABLE RESERVATION (PIID TEXT PRIMARY KEY NOT NULL, H1 TEXT, H2 TEXT, H3 TEXT,H4 TEXT, H5 TEXT, H6 TEXT, H7 TEXT, H8 TEXT, H9 TEXT,H10 TEXT, H11 TEXT, H12 TEXT, H13 TEXT, H14 TEXT, H15 TEXT,H16 TEXT, H17 TEXT, H18 TEXT, H19 TEXT, H20 TEXT, H21 TEXT,H22 TEXT, H23 TEXT, H24 TEXT);";
@@ -70,7 +70,10 @@ public class LeshanServerSQLite {
 		   this.confidence=confidence;
 		   this.pathToFile=pathToFile;
 		   this.ReservedFor=ReservedFor;
+		   
+		   
 */		   
+		   Tablename = "["+Tablename+"]";
 if(code == 1) // IoTParking
 {
 			   String str = "INSERT INTO "+Tablename+" (TIME,EVENT,PIID,OCCUPANCY,OCCUPIEDCARNO,CONFIDENCECARNO,PATHTOFILE,RESERVEDFOR) VALUES (" 
@@ -87,7 +90,7 @@ if(code == 1) // IoTParking
 			   insert(str);
 }			   
 else if (code ==10) // OVERVIEW-TABLE // Insert if not update
-{
+{		
 	   String str = "INSERT INTO "+Tablename+" (TIME, EVENT,PIID , STATE , CARNUMBER ) VALUES (" 
 	   + Long.toString(time)
 	   + ",'"+event
@@ -95,7 +98,7 @@ else if (code ==10) // OVERVIEW-TABLE // Insert if not update
 	   + "','"+Occupancy
 	   +"','"+OccuCarID
 	   + "');" ;
-		//System.out.println(str);
+		System.out.println(str);
 	   boolean success = insert(str);	   
 	   if (!success)
 	   {	//System.out.println("Attempting Update Operation");
@@ -398,10 +401,11 @@ else if(code == 41) { // add new vehicle registrations to DB
 			    
 			    if(!(tableName.equals("IoTParking")||tableName.equals("OVERVIEW")||tableName.equals("REGISTERED_VEHICLES"))) 
 				   if(code==1) { // check for clashing reservation for user requested time
+					   String tableName_ = "["+tableName+"]";
 					   System.out.println("Checking table " + tableName );
 					   String sql = 
 							    "SELECT  *" + 
-								" FROM "+tableName+" r " + 
+								" FROM "+tableName_+" r " + 
 								" WHERE ("+Integer.toString(start)+" BETWEEN r.RSTART AND r.REND) " + 
 								" OR ("+Integer.toString(end)+" BETWEEN r.RSTART AND r.REND) " + 
 								" OR ("+Integer.toString(start)+" <= r.RSTART AND "+Integer.toString(end)+" >= r.REND);";
