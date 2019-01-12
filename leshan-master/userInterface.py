@@ -5,8 +5,8 @@ import time
 import sys
 import os
 
-
 ip="192.168.178.44"
+
 
 def register() :
 	print("\n\n--------------------------------\n")
@@ -31,7 +31,7 @@ def register() :
 def reserve() :
 	print("\n\n--------------------------------\n")
 	print "\nWelcome to Reservation Service\n"
-	'''
+	'''	
 	VehiclePlateNumber =raw_input('Enter Vehicle Licence Plate Number -> \n')
 	dt1 =raw_input('Input Format to enter reservation time - > dd/mm/yyyy hh:mm:ss \nEnter Start Time: ')
 	dt2 = raw_input('Enter Number of hours: ')
@@ -41,7 +41,7 @@ def reserve() :
 	StartTime=int(time.time())+5
 	End = StartTime+30
 	VehiclePlateNumber = "aa"
-	
+
 	query = "http://"+ip+":8080/api/clients/httpQuery/"+str(StartTime)+"/"+str(End)+"/"+str(VehiclePlateNumber)
 	print query
 	r = requests.put(query)
@@ -96,6 +96,7 @@ def reserve() :
 	print("\n--------------------------------\n")
 	raw_input('')
 	os.system('clear')
+
 def main():
 	
 	print("\n**********************************************\n")	
@@ -116,6 +117,7 @@ def main():
 
 
 if __name__ == '__main__':
+	
 	os.system('clear')
 	while True:    
 		main()

@@ -14,7 +14,7 @@ StartTime = int(time.mktime(datetime.datetime.strptime(dt1,"%d/%m/%Y %H:%M:%S").
 End = int(time.mktime(datetime.datetime.strptime(dt2,"%d/%m/%Y %H:%M:%S").timetuple()))
 '''
 
-Vehicle_ID = "VEH-1"
+Vehicle_ID = "VEH-1"      # for now this filed works as Number Plate 
 VehiclePlateNumber = "BCNL112"
 
 query = "http://192.168.178.44:8080/api/clients/vehicleRegister/"+str(Vehicle_ID)+"/"+str(VehiclePlateNumber)

@@ -100,16 +100,7 @@ public class EventServlet extends EventSourceServlet {
         public void registered(Registration registration, Registration previousReg,
                 Collection<Observation> previousObsersations) {
             String jReg = EventServlet.this.gson.toJson(registration);
-            System.out.println("registration");
-            //System.out.println(jReg );
-            
-        
-            
-            //System.out.println(registration.getObjectLinks());
-            //System.out.println(registration.getSortedObjectLinks());
-            System.out.println("Registration Done. geTreasource Calling");
-            //manager.query_resource_status();
-            
+            System.out.println("registration");   
             
             try { // Get initial values from client and store to database | Also create a map
             	String occupancyValue =ClientServlet.getResource(registration, 1); // also updates Overview table
@@ -128,7 +119,7 @@ public class EventServlet extends EventSourceServlet {
             
         }
 
-        
+      
         @Override
         public void updated(RegistrationUpdate update, Registration updatedRegistration,
                 Registration previousRegistration) {
