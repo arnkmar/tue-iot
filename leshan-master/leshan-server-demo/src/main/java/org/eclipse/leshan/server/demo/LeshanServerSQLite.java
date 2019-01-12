@@ -382,7 +382,7 @@ public class LeshanServerSQLite {
 		      System.out.println("Opened database successfully");
 		      stmt = c.createStatement();
 		      
-		      String sql = "SELECT * FROM registered_vehicles WHERE VEHID='VEH_1';";
+		      String sql = "SELECT * FROM registered_vehicles WHERE VEHID='"+Vehicle_ID+"';";
 		      
 		      ResultSet rs = stmt.executeQuery( sql);
 		      
@@ -473,7 +473,7 @@ public class LeshanServerSQLite {
 						    		  //System.out.println("Table : " + tableName );
 						    		  
 						    		 
-						    		  sql = "SELECT STATUS FROM OVERVIEW where piid = '"+tableName+"';";
+						    		  sql = "SELECT STATUS,STATE FROM OVERVIEW where piid = '"+tableName+"';";
 						    		  
 						    		  rs = stmt.executeQuery( sql);
 								      //System.out.println(rs);

@@ -47,22 +47,12 @@ public class manager {
     static class Task extends TimerTask {
         @Override
         public void run() {
-        	// find a time from HMap that is below 'now'
-        	
-        	// call markReserved
-        	
-        	// find next least time and schedule it
-           //int delay = (5 + new Random().nextInt(5)) * 1000;
-        	
-        	
+
         	
         	updateClientReservationStatus();
         	int delay = getNextSchedule();
             timer.schedule(new Task(), delay);
-           // timerTask(Integer.toString(delay));
-            
-            //clientServlet.markParkingSpotReserved("test123","LeshanClientDemo");
-           // System.out.println("********************************************Schedule****************************");
+
         }
 
     }
