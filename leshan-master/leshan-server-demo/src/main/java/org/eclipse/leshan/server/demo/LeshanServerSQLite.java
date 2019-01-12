@@ -476,16 +476,17 @@ public class LeshanServerSQLite {
 						    		  sql = "SELECT STATUS FROM OVERVIEW where piid = '"+tableName+"';";
 						    		  
 						    		  rs = stmt.executeQuery( sql);
-								      System.out.println(rs);
+								      //System.out.println(rs);
 								      
 								      if ( rs.next() ) {
-									        
-									         String  Status = rs.getString("STATUS");
-									         System.out.println( "Event = " + Status + "piid = ");
-									         if(!Status.equals("INACTIVE"))
+								    	     String  Status = rs.getString("STATUS");
+									         String  State = rs.getString("STATE");
+									         //System.out.println( "Event = " + Status + "piid = ");
+									         if(!(Status.equals("INACTIVE")||State.equals("occupied")))
 									        	 ret = ret +","+ tableName;
-									         else
-									         System.out.println("Node Inactive Sorry");
+									         //else {
+									         //System.out.println("Node Inactive Sorry");
+									         //}
 									      }
 						    		  
 						    	  	  

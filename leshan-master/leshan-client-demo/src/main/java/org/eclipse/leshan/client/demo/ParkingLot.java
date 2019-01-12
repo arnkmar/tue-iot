@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Scanner;
+
+import org.apache.commons.lang.StringUtils;
 import org.eclipse.leshan.client.resource.BaseInstanceEnabler;
 import org.eclipse.leshan.core.model.ObjectModel;
 import org.eclipse.leshan.core.node.LwM2mResource;
@@ -36,10 +38,11 @@ public class ParkingLot extends BaseInstanceEnabler {
     private static final List<Integer> supportedResources = Arrays.asList(SPOT_ID,SPOT_STATE_ID,VEHICLE,BILLING_RATE_ID);
     
     private String PARKING_SPOT_ID = "Parking-Spot-4";
-    private String PARKING_SPOT_STATE = "Free";
+    private String PARKING_SPOT_STATE = "free";
     private boolean RESERVATION=false;
     private String VEHICLE_ID=null;
     private double BILLING_RATE=0.01; 
+    private float CONFIDENCE;
    
     public ParkingLot() {
     	
@@ -127,6 +130,12 @@ public class ParkingLot extends BaseInstanceEnabler {
         }
     }
     
+    class occupancy 
+    {
+    	public String CarLicencePlate;
+    	public float confidence;
+    };
+    
     public void getParkingSpotState() {
     	String spot_dir = "/spot_occupied";
         System.out.println("Working Directory = " + System.getProperty("user.dir"));
@@ -138,7 +147,17 @@ public class ParkingLot extends BaseInstanceEnabler {
         if(exists) 
         {
         	PARKING_SPOT_STATE = "occupied";
-        	VEHICLE_ID = "RANDOM";
+        	occupancy occ = new occupancy();
+        	splitOccupancyData(tmpDir,occ);
+        	
+        	
+    	    System.out.println("occ  " + occ.CarLicencePlate);
+    	    System.out.println("occ  " + occ.confidence); 
+        	VEHICLE_ID = occ.CarLicencePlate;
+        	//CONFIDENCE = occ.confidence;
+        	
+        	
+
         	
         }
         else 
@@ -149,6 +168,40 @@ public class ParkingLot extends BaseInstanceEnabler {
         
         
         	
+    }
+    
+    private void splitOccupancyData(File tmpDir, occupancy tmp) {
+    	
+    
+    	File[] listOfFiles = tmpDir.listFiles();
+    	
+    	System.out.println("File in method" );
+
+    	try {
+    	for (int i = 0; i < listOfFiles.length; i++) {
+    	  if (listOfFiles[i].isFile()) {
+    	    System.out.println("File " + listOfFiles[i].getName());
+    	  } else if (listOfFiles[i].isDirectory()) {
+    	    System.out.println("Directory " + listOfFiles[i].getName());
+    	    String[] parts = listOfFiles[i].getName().split("=");
+
+    	    System.out.println("next" );
+    	    tmp.CarLicencePlate=parts[0];
+    	    tmp.confidence=Float.valueOf(parts[1]);
+    	    
+    	    System.out.println("tmp " + tmp.CarLicencePlate);
+    	    System.out.println("tmp " + tmp.confidence);
+    	  
+    	  }
+    	  
+    	}
+    	}
+    	catch (Exception e){
+    		
+    		System.out.println("ERROR " );
+    		
+    	}
+ 
     }
     
     public void systemCommand() {
