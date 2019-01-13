@@ -31,8 +31,9 @@ def register() :
 def reserve() :
 	print("\n\n--------------------------------\n")
 	print "\nWelcome to Reservation Service\n"
-	'''	
+		
 	VehiclePlateNumber =raw_input('Enter Vehicle Licence Plate Number -> \n')
+	'''
 	dt1 =raw_input('Input Format to enter reservation time - > dd/mm/yyyy hh:mm:ss \nEnter Start Time: ')
 	dt2 = raw_input('Enter Number of hours: ')
 	StartTime = int(time.mktime(datetime.datetime.strptime(dt1,"%d/%m/%Y %H:%M:%S").timetuple()))
@@ -40,7 +41,7 @@ def reserve() :
 	'''
 	StartTime=int(time.time())+5
 	End = StartTime+30
-	VehiclePlateNumber = "aa"
+	#VehiclePlateNumber = "aa"
 
 	query = "http://"+ip+":8080/api/clients/httpQuery/"+str(StartTime)+"/"+str(End)+"/"+str(VehiclePlateNumber)
 	print query
@@ -55,11 +56,11 @@ def reserve() :
 		if response[1] == str('Please Register your vehicle first')  : 
 			print 'Please Register your vehicle first'
 		else:
-			if vehicleDetails[1] != str('null')  : # CRIMINAL RECORD
+			if vehicleDetails[1] == str('YES')  : # CRIMINAL RECORD
 				print "\nSorry! Your vehicle been BlackListed due to a crimial record.\n You cannot avail the service."
 				print "\nPlease contact us if you think we have made a mistake.\n"
 				print ""
-			elif vehicleDetails[2] != str('null')  : # parking fees Dues
+			elif vehicleDetails[2] != str('0.0')  : # parking fees Dues
 				print "\nYou have unpaid dues for the earlier service(s). \n Please repay them to avail the service."
 				print "\nPlease contact us if you think we have made a mistake.\n"
 				print ""
