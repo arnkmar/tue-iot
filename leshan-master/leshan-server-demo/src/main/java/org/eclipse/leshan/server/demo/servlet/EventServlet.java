@@ -242,8 +242,6 @@ public class EventServlet extends EventSourceServlet {
                 		
                 	}
                 }
-
-              
             }
         }
 
