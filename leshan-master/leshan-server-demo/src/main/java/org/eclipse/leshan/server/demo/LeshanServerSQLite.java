@@ -10,7 +10,7 @@ public class LeshanServerSQLite {
 		      Connection c = null;
 		      Statement stmt = null;
 		      tablename = "["+tablename+"]";
-		     String VehicleReg = "CREATE TABLE REGISTERED_VEHICLES (TIME BIGINT, VEHID TEXT PRIMARY KEY NOT NULL, LICPLNUM TEXT, CRIMNL_RECD TEXT, DUES TEXT, COMMENTS TEXT);"; 
+		     String VehicleReg = "CREATE TABLE REGISTERED_VEHICLES (TIME BIGINT, VEHID TEXT PRIMARY KEY NOT NULL, VEHNAME TEXT NOT NULL, CRIMNL_RECD TEXT, DUES TEXT, COMMENTS TEXT);"; 
 		     String Overview = "CREATE TABLE OVERVIEW ( TIME BIGINT NOT NULL,  STATUS TEXT,PIID TEXT PRIMARY KEY, STATE TEXT, CARNUMBER TEXT, PVALIDITY TEXT);";
 		     //String RESERVATION_H24 ="CREATE TABLE RESERVATION (PIID TEXT PRIMARY KEY NOT NULL, H1 TEXT, H2 TEXT, H3 TEXT,H4 TEXT, H5 TEXT, H6 TEXT, H7 TEXT, H8 TEXT, H9 TEXT,H10 TEXT, H11 TEXT, H12 TEXT, H13 TEXT, H14 TEXT, H15 TEXT,H16 TEXT, H17 TEXT, H18 TEXT, H19 TEXT, H20 TEXT, H21 TEXT,H22 TEXT, H23 TEXT, H24 TEXT);";
 		     String RESERVATION_Table_per_ParkingLot = "CREATE TABLE "+tablename+" (TIME BIGINT PRIMARY KEY NOT NULL, RSTART BIGINT, REND BIGINT, RCAR TEXT, PSTART BIGINT, PEND BIGINT, PCAR TEXT, VALID BIGINT);";
@@ -77,7 +77,7 @@ public class LeshanServerSQLite {
 						   +",'"+pathToFile
 						   +"','"+ReservedFor
 						   + "');" ;
-					 		//System.out.println(str);
+					 		System.out.println(str);
 						   insert(str);
 			}			   
 			else if (code ==10) // OVERVIEW-TABLE // Insert if not update
@@ -149,14 +149,9 @@ public class LeshanServerSQLite {
 					insert(sql);
 					
 				}
-				//System.out.println(sql);
-			}
-			else if(code == 41) { // add new vehicle registrations to DB 
-				
-				sql = "INSERT INTO "+Tablename_+" (TIME, VEHID,LICPLNUM) VALUES (1,'VEH_1','LICENSE123');";
-			
 				
 			}
+
 		   
 	   }
 	   

@@ -237,7 +237,7 @@ public class ClientServlet extends HttpServlet {
 //        }
 //        System.out.println("***************************");
     	String carID="" ;
-    	if(!occupancy[1].equals("free")) {
+    	if(!occupancy[1].toLowerCase().equals("free")) {
     	ReadRequest request2 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
     	ReadResponse cResponse2 = server_static.send(registration, request2, TIMEOUT);
     	
@@ -261,7 +261,7 @@ public class ClientServlet extends HttpServlet {
     	System.out.println("ClientServlet->getResource-Registration : "+occupancy[1]);
 
     	
-        LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",registration.getEndpoint(),occupancy[1],carID,0,null,null);
+        LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,0,null,null);
         
         return occupancy[1];
     	}
@@ -367,12 +367,13 @@ public class ClientServlet extends HttpServlet {
         	try {
 	        		
 	        	String VehicleID = path[1];
-	        	String VehiclePlateNumber = path[2];   
+	        	String VehicleName = path[2];   
      	
-			   String str = "INSERT INTO REGISTERED_VEHICLES (TIME,VEHID,LICPLNUM) VALUES (" 
+			   String str = "INSERT INTO REGISTERED_VEHICLES (TIME,VEHID,VEHNAME) VALUES (" 
 			   + Long.toString(Instant.now().getEpochSecond())
 			   + ",'"+VehicleID
-			   + "','"+VehiclePlateNumber
+			   + "','"+VehicleName
+			   + "','"+"0.0"
 			   + "');" ; 
 
 				if(LeshanServerSQLite.insert(str))  	
@@ -402,7 +403,7 @@ public class ClientServlet extends HttpServlet {
 			   + "','"+vehicleID
 			   + "');" ; 
 			   
-
+			   
 				   //Add reservation start to Scheduler
 				   manager.addToHash(Integer.valueOf(StartTime), ClietName, vehicleID, "Start");
 				   manager.addToHash(Integer.valueOf(Endtime), ClietName, null, "End");
@@ -413,6 +414,8 @@ public class ClientServlet extends HttpServlet {
 			   try {
 				   System.out.println("*******------------------------**************************");
 				LeshanServerSQLite.insert(str);
+				
+				LeshanServerSQLite.ToSQLDB("IoTParking",1,Instant.now().getEpochSecond(),"Reservation",StartTime,Endtime,null,0,null,ClietName );
 				   rate=rate+",ReferenceID,"+Long.toString(now); 
 				processDeviceResponse_user(req, resp, rate);	   
 				   
