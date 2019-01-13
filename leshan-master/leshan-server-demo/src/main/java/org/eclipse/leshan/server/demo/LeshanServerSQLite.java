@@ -25,9 +25,6 @@ public class LeshanServerSQLite {
                      " RESERVEDFOR        TEXT )"; 
 
 	         String sql = null;
-
-	         
-
 		     
 		      try {
 		         Class.forName("org.sqlite.JDBC");
