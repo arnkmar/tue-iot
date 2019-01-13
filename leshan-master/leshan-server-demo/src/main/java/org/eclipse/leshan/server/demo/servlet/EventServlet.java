@@ -233,9 +233,7 @@ public class EventServlet extends EventSourceServlet {
 								LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"Active",registration.getEndpoint(),occupancy[1].toLowerCase(),null,0,null,null );
 								LeshanServerSQLite.ToSQLDB(registration.getEndpoint(),30,time_now,"CarExit",registration.getEndpoint(),occupancy[1].toLowerCase(),null,0,null,null );
 								LeshanServerSQLite.ToSQLDB("IoTParking",1,time_now,"Car-Exit",registration.getEndpoint(),occupancy[1].toLowerCase(),null,0,null,null );
-
-								
-								
+	
 							} catch (SQLException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
