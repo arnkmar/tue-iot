@@ -219,43 +219,44 @@ public class ClientServlet extends HttpServlet {
     	
     	String target1 = "/32700/0/32801";
     	String target2 = "/32700/0/32802";
+    	String target3 = "/32700/0/32803";
     	long TIMEOUT = 5000; // ms
     	try {
+    		
+    		
+    	if(code ==3) {
+    		
+        	ReadRequest request3 = new ReadRequest(ContentFormat.fromName("JSON"), target3);
+        	ReadResponse cResponse3 = server_static.send(registration, request3, TIMEOUT);
+        	String[] path3 = StringUtils.split(cResponse3.getContent().toString(), ',');
+        	String[] rates = StringUtils.split(path3[1], '=');
+        	return rates[1];
+    		
+    	}
     		
     	ReadRequest request = new ReadRequest(ContentFormat.fromName("JSON"), target1);
     	ReadResponse cResponse = server_static.send(registration, request, TIMEOUT);
     	String[] path = StringUtils.split(cResponse.getContent().toString(), ',');
     	String[] occupancy = StringUtils.split(path[1], '=');
-//    	java.util.List<String> respList = Arrays.asList(str.split(/));
-//        System.out.println("***************************");
-//        System.out.println(request);
-//        System.out.println(cResponse);
-//        System.out.println(str);
-//        for (int i=0;i<respList.size();i++)
-//        { System.out.println(respList.get(i));
-//        System.out.println("test");
-//        }
-//        System.out.println("***************************");
+
+    	
+    	
     	String carID="" ;
     	if(!occupancy[1].toLowerCase().equals("free")) {
-    	ReadRequest request2 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
-    	ReadResponse cResponse2 = server_static.send(registration, request2, TIMEOUT);
-    	
-    	String[] path2 = StringUtils.split(cResponse2.getContent().toString(), ',');
-    	String[] carIDs = StringUtils.split(path2[1], '=');
-    	carID = carIDs[1];
-    	
-    	if(code==2) {
-			
-			return carID;
-			
-		}
-    	
+    		
+	    	ReadRequest request2 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
+	    	ReadResponse cResponse2 = server_static.send(registration, request2, TIMEOUT);
+	    	
+	    	String[] path2 = StringUtils.split(cResponse2.getContent().toString(), ',');
+	    	String[] carIDs = StringUtils.split(path2[1], '=');
+	    	carID = carIDs[1];
+	    	
+	    	if(code==2)
+				return carID;
+
     	}
 
-//    	ReadRequest request3 = new ReadRequest(ContentFormat.fromName("JSON"), target2);
-//    	ReadResponse cResponse3 = server_static.send(registration, request2, TIMEOUT);
-//    	String spotID = cResponse3.getContent().toString();    	
+
     				
     	
     	System.out.println("ClientServlet->getResource-Registration : "+occupancy[1]);

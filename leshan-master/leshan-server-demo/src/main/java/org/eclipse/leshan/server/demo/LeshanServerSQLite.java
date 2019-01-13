@@ -13,7 +13,7 @@ public class LeshanServerSQLite {
 		     String VehicleReg = "CREATE TABLE REGISTERED_VEHICLES (TIME BIGINT, VEHID TEXT PRIMARY KEY NOT NULL, VEHNAME TEXT NOT NULL, CRIMNL_RECD TEXT, DUES TEXT, COMMENTS TEXT);"; 
 		     String Overview = "CREATE TABLE OVERVIEW ( TIME BIGINT NOT NULL,  STATUS TEXT,PIID TEXT PRIMARY KEY, STATE TEXT, CARNUMBER TEXT, PVALIDITY TEXT);";
 		     //String RESERVATION_H24 ="CREATE TABLE RESERVATION (PIID TEXT PRIMARY KEY NOT NULL, H1 TEXT, H2 TEXT, H3 TEXT,H4 TEXT, H5 TEXT, H6 TEXT, H7 TEXT, H8 TEXT, H9 TEXT,H10 TEXT, H11 TEXT, H12 TEXT, H13 TEXT, H14 TEXT, H15 TEXT,H16 TEXT, H17 TEXT, H18 TEXT, H19 TEXT, H20 TEXT, H21 TEXT,H22 TEXT, H23 TEXT, H24 TEXT);";
-		     String RESERVATION_Table_per_ParkingLot = "CREATE TABLE "+tablename+" (TIME BIGINT PRIMARY KEY NOT NULL, RSTART BIGINT, REND BIGINT, RCAR TEXT, PSTART BIGINT, PEND BIGINT, PCAR TEXT, VALID BIGINT);";
+		     String RESERVATION_Table_per_ParkingLot = "CREATE TABLE "+tablename+" (TIME BIGINT PRIMARY KEY NOT NULL, RSTART BIGINT, REND BIGINT, RCAR TEXT, PSTART BIGINT, PEND BIGINT, PCAR TEXT, VALID INT, RATE REAL);";
 	         String IoTparking_all_events = "CREATE TABLE IoTParking " +
      		 		"(TIME BIGINT PRIMARY KEY   NOT NULL," +
      		 		" PIID TEXT 			     ," +
@@ -117,7 +117,7 @@ public class LeshanServerSQLite {
 				ReservedFor = checkForReservation(Tablename_, time,0);
 				
 				if(ReservedFor==null)	{		
-				sql = "insert into "+Tablename_+" (time,pstart,pcar) values ("+Long.toString(time)+","+Long.toString(time)+",'"+OccuCarID+"');";
+				sql = "insert into "+Tablename_+" (time,pstart,pcar,rate) values ("+Long.toString(time)+","+Long.toString(time)+",'"+OccuCarID+"',"+confidence+");";
 				insert(sql);
 				}
 				else {
@@ -129,7 +129,7 @@ public class LeshanServerSQLite {
 						 //System.out.println(sql);
 						insert (sql);
 						
-						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=0,PSTART="+Long.toString(time)+" WHERE TIME="+ReservedAt+";";
+						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=0,PSTART="+Long.toString(time)+" rate="+confidence+" WHERE TIME="+ReservedAt+";";
 						//System.out.println(sql);
 						insert (sql);
 						
@@ -140,7 +140,7 @@ public class LeshanServerSQLite {
 						sql = "UPDATE OVERVIEW SET PVALIDITY='VALID' WHERE PIID IS '"+Tablename+"';";
 						//System.out.println(sql);
 						insert (sql);
-						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=1,PSTART="+Long.toString(time)+" WHERE TIME="+ReservedAt+";";
+						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=1,PSTART="+Long.toString(time)+" rate="+confidence+" WHERE TIME="+ReservedAt+";";
 						//System.out.println(sql);
 						insert (sql);
 					}

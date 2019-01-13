@@ -217,10 +217,12 @@ public class EventServlet extends EventSourceServlet {
                 		if(occupancy[1].equals("occupied")) {
                 		try {
 							String carID =ClientServlet.getResource(registration, 2); // get car ID with code 2
-							//System.out.println("Observation CARID:"+carID);
+							String rate= ClientServlet.getResource(registration, 3); // get parking rate with code 3
+							
+							System.out.println("Observation RATE ***** :"+rate);
 							LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"Active",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,0,null,null );
 							LeshanServerSQLite.ToSQLDB("IoTParking",1,time_now,"Car-Entry",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,0,null,null );
-							LeshanServerSQLite.ToSQLDB(registration.getEndpoint(),31,time_now,"CarEntry",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,0,null,null );
+							LeshanServerSQLite.ToSQLDB(registration.getEndpoint(),31,time_now,"CarEntry",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,Float.parseFloat(rate),null,null );
 						} catch (SQLException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
