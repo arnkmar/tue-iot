@@ -20,7 +20,7 @@ while True:
 			ip = val[7]
 			print "\nConnecting to server that was first listed during discovery process."
 			print "\nConnecting to Service Name = "+ val[3] +" at ServerIP = "+ip+"\n\n\n"
-			os.system("java -jar runnable_1.jar -u "+ip+" -n parking-1")
+			os.system("java -jar leshanparkingclient-group4.jar -u "+ip+" -n Parking-Spot-4")
 			break
 
 

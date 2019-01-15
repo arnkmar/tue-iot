@@ -1,0 +1,1 @@
+=;lo;IPv4;IoTParkingServer-Group4;_coap._udp;local;localhost;127.0.0.1;5683;"“/mylight”"

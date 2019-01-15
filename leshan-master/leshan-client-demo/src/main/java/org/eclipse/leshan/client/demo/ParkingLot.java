@@ -138,60 +138,34 @@ public class ParkingLot extends BaseInstanceEnabler {
     
     public void getParkingSpotState() {
     	String spot_dir = "/spot_occupied";
-        System.out.println("Working Directory = " + System.getProperty("user.dir"));
+        
         File tmpDir = new File(System.getProperty("user.dir")+spot_dir);
         boolean exists = tmpDir.exists();
-        
-       // systemCommand();
         
         if(exists) 
         {
         	PARKING_SPOT_STATE = "occupied";
         	occupancy occ = new occupancy();
-        	splitOccupancyData(tmpDir,occ);
-        	
-        	
-    	    System.out.println("occ  " + occ.CarLicencePlate);
-    	    System.out.println("occ  " + occ.confidence); 
+        	splitOccupancyData(tmpDir,occ);       	
         	VEHICLE_ID = occ.CarLicencePlate;
-        	//CONFIDENCE = occ.confidence;
-        	
-        	
-
-        	
         }
         else 
         {	if(PARKING_SPOT_STATE.equals("occupied"))
-        	PARKING_SPOT_STATE = "free";
-        	
+        	PARKING_SPOT_STATE = "free";	
         }
         
-        
-        	
     }
     
-    private void splitOccupancyData(File tmpDir, occupancy tmp) {
-    	
-    
+    private void splitOccupancyData(File tmpDir, occupancy tmp) { 
     	File[] listOfFiles = tmpDir.listFiles();
     	
-    	System.out.println("File in method" );
-
     	try {
     	for (int i = 0; i < listOfFiles.length; i++) {
-    	  if (listOfFiles[i].isFile()) {
-    	    System.out.println("File " + listOfFiles[i].getName());
-    	  } else if (listOfFiles[i].isDirectory()) {
-    	    System.out.println("Directory " + listOfFiles[i].getName());
-    	    String[] parts = listOfFiles[i].getName().split("=");
 
-    	    System.out.println("next" );
+    		if (listOfFiles[i].isDirectory()) {
+    	    String[] parts = listOfFiles[i].getName().split("=");
     	    tmp.CarLicencePlate=parts[0];
-    	    tmp.confidence=Float.valueOf(parts[1]);
-    	    
-    	    System.out.println("tmp " + tmp.CarLicencePlate);
-    	    System.out.println("tmp " + tmp.confidence);
-    	  
+    	    tmp.confidence=Float.valueOf(parts[1]);  
     	  }
     	  
     	}
@@ -199,49 +173,8 @@ public class ParkingLot extends BaseInstanceEnabler {
     	catch (Exception e){
     		
     		System.out.println("ERROR " );
-    		
     	}
- 
     }
-    
-    public void systemCommand() {
-    	Runtime rt = Runtime.getRuntime();
-    	String[] commands = {"ls","-a"};
-
-    	Process proc = null;
-		try {
-			proc = rt.exec(commands);
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-    	InputStream stdin = proc.getInputStream();
-    	InputStreamReader isr = new InputStreamReader(stdin);
-    	BufferedReader br = new BufferedReader(isr);
-
-    	String line = null;
-    	System.out.println("<OUTPUT>");
-
-    	try {
-			while ( (line = br.readLine()) != null)
-			     System.out.println(line);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-    	System.out.println("</OUTPUT>");
-    	int exitVal = 0;
-		try {
-			exitVal = proc.waitFor();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	System.out.println("Process exitValue: " + exitVal);
-    }
-
     @Override
     public List<Integer> getAvailableResourceIds(ObjectModel model) {
         return supportedResources;

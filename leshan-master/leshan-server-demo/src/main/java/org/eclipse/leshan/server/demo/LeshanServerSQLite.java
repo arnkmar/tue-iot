@@ -38,9 +38,7 @@ public class LeshanServerSQLite {
 			     else if(code == 4)
 			    	 sql =VehicleReg;
 			     
-			    // System.out.println(sql);
-  
-		         System.out.println("Opened database successfully");
+
 
 		         stmt = c.createStatement();
 		         
@@ -52,10 +50,10 @@ public class LeshanServerSQLite {
 		         c.close();
 		      } catch ( Exception e ) {
 		         System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-		         //System.exit(0);
+
 		         return;
 		      }
-		      System.out.println("Table created successfully");
+
 		   }
 	   
 	   public static void ToSQLDB(String Tablename,int code, long time,String event, String piid, String Occupancy, String OccuCarID, double confidence, String pathToFile, String ReservedFor) throws SQLException {
@@ -74,7 +72,7 @@ public class LeshanServerSQLite {
 						   +",'"+pathToFile
 						   +"','"+ReservedFor
 						   + "');" ;
-					 		System.out.println(str);
+					 		
 						   insert(str);
 			}			   
 			else if (code ==10) // OVERVIEW-TABLE // Insert if not update
@@ -87,10 +85,10 @@ public class LeshanServerSQLite {
 				   +"','"+OccuCarID
 				   
 				   + "');" ;
-					//System.out.println(str);
+					
 				   boolean success = insert(str);	   
 				   if (!success)
-				   {	//System.out.println("Attempting Update Operation");
+				   {	
 					   str = "UPDATE "+Tablename_+" SET TIME="+ Long.toString(time)
 					   		+",STATUS='"+event
 					   		+"',STATE='"+Occupancy
@@ -98,7 +96,7 @@ public class LeshanServerSQLite {
 					   		+"',PVALIDITY='"
 					   		+"' WHERE PIID='"+piid
 					   		+ "';" ;
-								//System.out.println(str);
+							
 							   update(str);
 				   }
 				   
@@ -123,11 +121,10 @@ public class LeshanServerSQLite {
 						
 						 System.out.println("Wrong car is in");
 						 sql = "UPDATE OVERVIEW SET PVALIDITY='INVALID' WHERE PIID IS '"+Tablename+"';";
-						 //System.out.println(sql);
+
 						insert (sql);
 						
-						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=0,PSTART="+Long.toString(time)+" rate="+confidence+" WHERE TIME="+ReservedAt+";";
-						//System.out.println(sql);
+						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=0,PSTART="+Long.toString(time)+" ,rate="+confidence+" WHERE TIME="+ReservedAt+";";
 						insert (sql);
 						
 						
@@ -135,10 +132,9 @@ public class LeshanServerSQLite {
 					else {
 						System.out.println("Correct car is in"); 
 						sql = "UPDATE OVERVIEW SET PVALIDITY='VALID' WHERE PIID IS '"+Tablename+"';";
-						//System.out.println(sql);
+
 						insert (sql);
-						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=1,PSTART="+Long.toString(time)+" rate="+confidence+" WHERE TIME="+ReservedAt+";";
-						//System.out.println(sql);
+						sql = "UPDATE "+Tablename_+" SET PCAR='"+OccuCarID+"', VALID=1,PSTART="+Long.toString(time)+" ,rate="+confidence+" WHERE TIME="+ReservedAt+";";
 						insert (sql);
 					}
 					
@@ -151,8 +147,6 @@ public class LeshanServerSQLite {
 
 		   
 	   }
-	   
-
 	   
 	   private static String checkForReservation(String tablename, long carEntryTime, int code ) {
 		   
@@ -168,7 +162,6 @@ public class LeshanServerSQLite {
 		      Class.forName("org.sqlite.JDBC");
 		      c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 		      c.setAutoCommit(false);
-		      //System.out.println("Opened database successfully");
 		      stmt = c.createStatement();		      
 			   String sql = 
 					    "SELECT  *" + 
@@ -190,7 +183,7 @@ public class LeshanServerSQLite {
 
 		      return resp;
 		   }
-		   //System.out.println("Operation-SELECT done successfully");
+
 		return resp;
 	}
 
@@ -202,8 +195,6 @@ public class LeshanServerSQLite {
 		         Class.forName("org.sqlite.JDBC");
 		         c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 		         c.setAutoCommit(false);
-		         //System.out.println("Opened database successfully");
-
 		         stmt = c.createStatement(); 
                  stmt.executeUpdate(sql);
 		         stmt.close();
@@ -214,7 +205,7 @@ public class LeshanServerSQLite {
 		         if (e.getMessage().contains("UNIQUE constraint failed:")) 
 		         {  stmt.close(); c.close(); return false;  }   
 		      }
-		      //System.out.println("Records created successfully");
+
 		      return true;
 		   }
 	   
@@ -226,8 +217,6 @@ public class LeshanServerSQLite {
 		      Class.forName("org.sqlite.JDBC");
 		      c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 		      c.setAutoCommit(false);
-		      //System.out.println("Opened database successfully");
-
 		      stmt = c.createStatement();
 		      ResultSet rs = stmt.executeQuery( "SELECT * FROM IoTParking;" );
 		      
@@ -235,28 +224,19 @@ public class LeshanServerSQLite {
 		         long time = rs.getLong("time");
 		         String  piid = rs.getString("piid");
 
-		         
-		        // System.out.println( "ID = " + time );
-		        // System.out.println( "NAME = " + piid );
 
-		         //System.out.println();
 		      }
 		      rs.close();
 		      stmt.close();
 		      c.close();
 		   } catch ( Exception e ) {
 		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-		      System.exit(0);
 		   }
-		  // System.out.println("Operation-SELECT done successfully");
 		  }
 	   
 	   public static String validateVehicle(String TableName, String ID) {
 
 		String sql="SELECT VEHID FROM "+TableName+" WHERE "+TableName+".VEHID='"+ID+"';";
-		
-		System.out.println(" validateVehicle:" + sql);
-
 		   String ret="NoReg";
 		   Connection c = null;
 		   Statement stmt = null;
@@ -264,13 +244,10 @@ public class LeshanServerSQLite {
 		      Class.forName("org.sqlite.JDBC");
 		      c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 		      c.setAutoCommit(false);
-		      System.out.println("Opened database successfully");
 		      stmt = c.createStatement();
 		      ResultSet rs = stmt.executeQuery( sql );		    
 		      while ( rs.next() ) {		         
 		         String  vehicleID = rs.getString("VEHID");
-		         System.out.println( "VEHID = "+ vehicleID  );		 
-		         System.out.println(rs);
 		         ret = "VehicleFound";
 		         
 		      }
@@ -280,9 +257,9 @@ public class LeshanServerSQLite {
 		      
 		   } catch ( Exception e ) {
 		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-		      System.exit(0);
+
 		   }
-		   System.out.println("Operation-HIT done successfully");
+
 		   return ret;
 	   }
 	   
@@ -296,42 +273,14 @@ public class LeshanServerSQLite {
 		      Class.forName("org.sqlite.JDBC");
 		      c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 		      c.setAutoCommit(false);
-		      System.out.println("Opened database successfully");
-		    //  set = " SALARY = 25000.00"; 
-		    //  where = " ID=1";
 		      stmt = c.createStatement();
-		      
-		      
-		      System.out.println(sql);
-		      //sql = "UPDATE COMPANY SET ADDRESS='hello' WHERE ID=1";
-		      System.out.println(sql);
 		      stmt.executeUpdate(sql);
 		      c.commit();
-
-//		      ResultSet rs = stmt.executeQuery( "SELECT * FROM COMPANY;" );
-		      
-//		      while ( rs.next() ) {
-//		         int id = rs.getInt("id");
-//		         String  name = rs.getString("name");
-//		         int age  = rs.getInt("age");
-//		         String  address = rs.getString("address");
-//		         float salary = rs.getFloat("salary");
-//		         
-//		         System.out.println( "ID = " + id );
-//		         System.out.println( "NAME = " + name );
-//		         System.out.println( "AGE = " + age );
-//		         System.out.println( "ADDRESS = " + address );
-//		         System.out.println( "SALARY = " + salary );
-//		         System.out.println();
-//		      }
-//		      rs.close();
 		      stmt.close();
 		      c.close();
 		   } catch ( Exception e ) {
 		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-		      System.exit(0);
 		   }
-		    System.out.println("Operation-UPDATE done successfully");
 		   }
 	   
 	   public static void delete( ) {
@@ -342,21 +291,16 @@ public class LeshanServerSQLite {
 		         Class.forName("org.sqlite.JDBC");
 		         c = DriverManager.getConnection("jdbc:sqlite:test_static.db");
 		         c.setAutoCommit(false);
-		         System.out.println("Opened database successfully");
-
 		         stmt = c.createStatement();
 		         String sql = "DELETE FROM COMPANY;";
 		         stmt.executeUpdate(sql);
 		         c.commit();
-
-
 		      stmt.close();
 		      c.close();
 		      } catch ( Exception e ) {
 		         System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-		         System.exit(0);
 		      }
-		      System.out.println("Operation-DELETE done successfully");
+
 		   }
 	   public static String VehicleRecordCheck(String Vehicle_ID){
 		   
@@ -371,7 +315,6 @@ public class LeshanServerSQLite {
 		      Class.forName("org.sqlite.JDBC");
 		      c = DriverManager.getConnection("jdbc:sqlite:IoTParking.db");
 		      c.setAutoCommit(false);
-		      System.out.println("Opened database successfully");
 		      stmt = c.createStatement();
 		      
 		      String sql = "SELECT * FROM registered_vehicles WHERE VEHID='"+Vehicle_ID+"';";
@@ -382,13 +325,7 @@ public class LeshanServerSQLite {
 		         TIME = rs.getLong("TIME");
 		         CRIMNL_RECD = rs.getString("CRIMNL_RECD");
 		         DUES = rs.getString("DUES");
-
-		         
-		         System.out.println( "TIME = " + TIME );
-		         System.out.println( "CRIMNL_RECD = " + CRIMNL_RECD );
-		         System.out.println( "DUES = " + DUES );
-
-		      }
+		         }
 		      
 		      
 
@@ -398,11 +335,8 @@ public class LeshanServerSQLite {
 		      return TIME+","+CRIMNL_RECD+","+DUES;
 		   } catch ( Exception e ) {
 		      System.err.println( e.getClass().getName() + ": " + e.getMessage() );
-		      System.exit(0);
-		   }
-		   System.out.println("Operation-SELECT done successfully");
-		   
-		   
+
+		   }     
 		   return null;
 	   }
 	   
@@ -442,7 +376,6 @@ public class LeshanServerSQLite {
 			    if(!(tableName.equals("IoTParking")||tableName.equals("OVERVIEW")||tableName.equals("REGISTERED_VEHICLES"))) 
 				   if(code==1) { // check for clashing reservation for user requested time
 					   String tableName_ = "["+tableName+"]";
-					   System.out.println("Checking table " + tableName );
 					   String sql = 
 							    "SELECT  *" + 
 								" FROM "+tableName_+" r " + 
@@ -457,36 +390,23 @@ public class LeshanServerSQLite {
 						      //System.out.println(rs);
 						      
 						      if ( rs.next() ) { // there is a blocking reservation
-						         //System.out.println("there is a blocking reservation");
+						         
 						      }
 						      else { // check if the spot is really a spot and the spot is also active currently.
 						    	  if(!(tableName.equals("IoTParking")||tableName.equals("OVERVIEW"))) 
-								    { //ret = ret +","+ tableName;
-						    		  //System.out.println("Table : " + tableName );
-						    		  
-						    		 
-						    		  sql = "SELECT STATUS,STATE FROM OVERVIEW where piid = '"+tableName+"';";
-						    		  
-						    		  rs = stmt.executeQuery( sql);
-								      //System.out.println(rs);
-								      
+								    { sql = "SELECT STATUS,STATE FROM OVERVIEW where piid = '"+tableName+"';";						    		  
+						    		  rs = stmt.executeQuery( sql);								      
 								      if ( rs.next() ) {
 								    	     String  Status = rs.getString("STATUS");
 									         String  State = rs.getString("STATE");
 									         //System.out.println( "Event = " + Status + "piid = ");
 									         if(!(Status.equals("INACTIVE")||State.equals("occupied")))
 									        	 ret = ret +","+ tableName;
-									         //else {
-									         //System.out.println("Node Inactive Sorry");
-									         //}
-									      }
-						    		  
-						    	  	  
+
+									      }			    		 
 						    	  	}
 						      }
-						     
-
-								
+							
 						} catch (SQLException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -505,9 +425,7 @@ public class LeshanServerSQLite {
 		  System.out.println("Could not get database metadata " + e.getMessage());
 
 		  }
-
-
-		   return ret;
+		  return ret;
 		   
 	   }
 	      

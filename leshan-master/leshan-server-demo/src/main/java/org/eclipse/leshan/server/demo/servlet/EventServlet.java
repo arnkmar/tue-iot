@@ -100,7 +100,7 @@ public class EventServlet extends EventSourceServlet {
         public void registered(Registration registration, Registration previousReg,
                 Collection<Observation> previousObsersations) {
             String jReg = EventServlet.this.gson.toJson(registration);
-            System.out.println("registration");   
+            System.out.println("New Registration : "+registration.getEndpoint());   
             
             try { // Get initial values from client and store to database | Also create a map
             	String occupancyValue =ClientServlet.getResource(registration, 1); // also updates Overview table
@@ -125,18 +125,17 @@ public class EventServlet extends EventSourceServlet {
         public void updated(RegistrationUpdate update, Registration updatedRegistration,
                 Registration previousRegistration) {
             String jReg = EventServlet.this.gson.toJson(updatedRegistration);
-            System.out.println("updated");
             sendEvent(EVENT_UPDATED, jReg, updatedRegistration.getEndpoint());
         }
         
         public void mapItr() {
             Set set = parkingLotoccupancyMap.entrySet();
             Iterator iterator = set.iterator();
-            System.out.println("Map Entry Check");
+            //System.out.println("Map Entry Check");
             while(iterator.hasNext()) {
                Map.Entry mentry = (Map.Entry)iterator.next();
-               System.out.print("key is: "+ mentry.getKey() + " & Value is: ");
-               System.out.println(mentry.getValue());
+               //System.out.print("key is: "+ mentry.getKey() + " & Value is: ");
+               //System.out.println(mentry.getValue());
             }
         }
 
@@ -144,7 +143,7 @@ public class EventServlet extends EventSourceServlet {
         public void unregistered(Registration registration, Collection<Observation> observations, boolean expired,
                 Registration newReg) {
             String jReg = EventServlet.this.gson.toJson(registration);
-            System.out.println("unregistration");
+            System.out.println("DeRegistration : "+registration.getEndpoint());
             try {
 				LeshanServerSQLite.ToSQLDB("IoTParking",1,Instant.now().getEpochSecond(),"De-registration",registration.getEndpoint(),null,null,0,null,null );
 				LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"INACTIVE",registration.getEndpoint(),null,null,0,null,null );
@@ -194,13 +193,9 @@ public class EventServlet extends EventSourceServlet {
                         .append(observation.getPath().toString()).append("\",\"val\":")
                         .append(gson.toJson(response.getContent())).append("}").toString();
                 sendEvent(EVENT_NOTIFICATION, data, registration.getEndpoint());
-                System.out.println("Onresponse Obervation");
-                
-               // System.out.println(observation.getPath().toString());
-                
+
                 if(observation.getPath().toString().equals("/32700/0/32801")) // snoop status of parkingSPot occupancy
                 {
-                	//System.out.println("EventServlet->onResponse-observation : "+response.getContent()+"");
                 	String[] path = StringUtils.split(response.getContent().toString(), ',');
                 	String[] occupancy = StringUtils.split(path[1], '=');
                 	
@@ -212,13 +207,12 @@ public class EventServlet extends EventSourceServlet {
                 	else {
                 		
                 		parkingLotoccupancyMap.replace(registration.getEndpoint(), occupancy[1].toLowerCase() );
-                		//System.out.println("Observation : Resource value - CNGE -"+registration.getEndpoint());
+                		System.out.println("Occupancy Resource value CHANGE at - "+registration.getEndpoint());
                 		//System.out.println("Observation :"+occupancy[1]+" "+parkingLotoccupancyMap.get(registration.getEndpoint()));
                 		if(occupancy[1].equals("occupied")) {
                 		try {
 							String carID =ClientServlet.getResource(registration, 2); // get car ID with code 2
 							String rate= ClientServlet.getResource(registration, 3); // get parking rate with code 3							
-							System.out.println("Observation RATE ***** :"+rate);
 							LeshanServerSQLite.ToSQLDB("OVERVIEW",10,time_now,"Active",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,0,null,null );
 							LeshanServerSQLite.ToSQLDB("IoTParking",1,time_now,"Car-Entry",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,0,null,null );
 							LeshanServerSQLite.ToSQLDB(registration.getEndpoint(),31,time_now,"CarEntry",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,Float.parseFloat(rate),null,null );

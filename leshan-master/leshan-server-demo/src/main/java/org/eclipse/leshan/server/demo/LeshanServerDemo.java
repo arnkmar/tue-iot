@@ -89,7 +89,7 @@ public class LeshanServerDemo {
     }
 
     private static final Logger LOG = LoggerFactory.getLogger(LeshanServerDemo.class);
-
+/*
     private final static String[] modelPaths = new String[] { "31024.xml", "32700.xml",
 
                             "10241.xml", "10242.xml", "10243.xml", "10244.xml", "10245.xml", "10246.xml", "10247.xml",
@@ -115,8 +115,9 @@ public class LeshanServerDemo {
                             "LWM2M_Software_Component-v1_0.xml", "LWM2M_Software_Management-v1_0.xml",
 
                             "Non-Access_Stratum_NAS_configuration-V1_0.xml" };
-
-    private final static String USAGE = "java -jar leshan-server-demo.jar [OPTION]\n\n";
+    */
+    private final static String[] modelPaths = new String[] { "32700.xml" };
+    private final static String USAGE = "java -jar leshanparkingserver-group4.jar [OPTION]\n\n";
 
     private final static String DEFAULT_KEYSTORE_TYPE = KeyStore.getDefaultType();
 
@@ -242,28 +243,14 @@ public class LeshanServerDemo {
             LOG.error("Jetty stopped with unexpected error ...", e);
         }
         
-        // Database access 
-        //LeshanServerSQLite test = new LeshanServerSQLite();
-        
-
+    	String dbName = "/IoTParking.db";
+        File tmp = new File(System.getProperty("user.dir")+dbName );
+        boolean exists = tmp.exists();
+        if(!exists) {
         LeshanServerSQLite.create(2,"OVERVIEW");
         LeshanServerSQLite.create(3,"IoT_All");
-        LeshanServerSQLite.create(4,"veh-reg");
-       	//LeshanServerSQLite.userToDB(1,6,7);
-     
-       
-        
-        //LeshanServerSQLite.insert();
-        //LeshanServerSQLite.select();
-        
-        //test.insert();
-        //test.select();
-        //test.update();
-        //test.delete();
-        //test.select();
-        
-        
-        
+        LeshanServerSQLite.create(4,"Veh-Reg");
+        }
     }
 
     public static void createAndStartServer(String webAddress, int webPort, String localAddress, int localPort,
@@ -378,7 +365,7 @@ public class LeshanServerDemo {
         }
 
         // Define model provider
-        List<ObjectModel> models = ObjectLoader.loadDefault();
+        List<ObjectModel> models  =  ObjectLoader.loadDefault();
         models.addAll(ObjectLoader.loadDdfResources("/models/", modelPaths));
         if (modelsFolderPath != null) {
             models.addAll(ObjectLoader.loadObjectsFromDir(new File(modelsFolderPath)));
@@ -400,19 +387,7 @@ public class LeshanServerDemo {
 
         // Create and start LWM2M server
         LeshanServer lwServer = builder.build();
-  /*      
-        //iot
-        //observe new registrations
-        lwServer.getClientRegistry().addListner(new ClientRegistryListner() {
-        	
-        	@Override
-        	public void registered(Client client) {
-        		System.out.println("new Client Registration: "+ client);
-        		
-        	}
-        }
-        //endiot
-*/
+
         // Now prepare Jetty
         InetSocketAddress jettyAddr;
         if (webAddress == null) {

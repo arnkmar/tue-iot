@@ -31,7 +31,6 @@ var leshanApp = angular.module('leshanApp',[
         'modalInstanceControllers',
         'ui.bootstrap',
         'helperServices',
-        'reservationController',
        
 ]);
 
@@ -40,7 +39,6 @@ leshanApp.config(['$routeProvider', '$locationProvider', function($routeProvider
         when('/clients',           { templateUrl : 'partials/client-list.html',   controller : 'ClientListCtrl' }).
         when('/clients/:clientId', { templateUrl : 'partials/client-detail.html', controller : 'ClientDetailCtrl' }).
         when('/security',          { templateUrl : 'partials/security-list.html', controller : 'SecurityCtrl' }).
-        when('/reserve',           { templateUrl : 'partials/parking-spot-register.html',   controller : 'parkingReservationCtrl' }).
 
-        otherwise({ redirectTo : '/reserve' });
+        otherwise({ redirectTo : '/clients' });
 }]);

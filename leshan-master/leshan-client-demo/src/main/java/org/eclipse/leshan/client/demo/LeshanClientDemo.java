@@ -61,7 +61,7 @@ public class LeshanClientDemo {
 
     private static final Logger LOG = LoggerFactory.getLogger(LeshanClientDemo.class);
 
-    private final static String[] modelPaths = new String[] { "3303.xml" , "32700.xml" };
+    private final static String[] modelPaths = new String[] {  "32700.xml" };
 
     private static final int OBJECT_ID_TEMPERATURE_SENSOR = 3303;
  
@@ -70,8 +70,8 @@ public class LeshanClientDemo {
     private static final int OBJECT_ID_PARKING = 32700;
     //endiot
     
-    private final static String DEFAULT_ENDPOINT = "LeshanClientDemo";
-    private final static String USAGE = "java -jar leshan-client-demo.jar [OPTION]\n\n";
+    private final static String DEFAULT_ENDPOINT = "Parking-Spot-4";
+    private final static String USAGE = "java -jar leshanparkingclient-group4.jar [OPTION]\n\n";
 
     private static MyLocation locationInstance;
 
@@ -374,13 +374,13 @@ public class LeshanClientDemo {
         }
         initializer.setClassForObject(DEVICE, MyDevice.class);
         initializer.setInstancesForObject(LOCATION, locationInstance);
-        initializer.setInstancesForObject(OBJECT_ID_TEMPERATURE_SENSOR, new RandomTemperatureSensor());
-        //List<LwM2mObjectEnabler> enablers = initializer.create(SECURITY, SERVER, DEVICE, LOCATION, OBJECT_ID_TEMPERATURE_SENSOR);
+        
+        
        
         //iot
         initializer.setInstancesForObject(OBJECT_ID_PARKING, new ParkingLot());
         
-        List<LwM2mObjectEnabler> enablers = initializer.create(SECURITY, SERVER, DEVICE, LOCATION, OBJECT_ID_TEMPERATURE_SENSOR,OBJECT_ID_PARKING);
+        List<LwM2mObjectEnabler> enablers = initializer.create(SECURITY, SERVER, DEVICE, LOCATION, OBJECT_ID_PARKING);
         //endiot
         
         
@@ -437,8 +437,7 @@ public class LeshanClientDemo {
                     Hex.encodeHexString(clientPrivateKey.getEncoded()));
         }
 
-        LOG.info("Press 'w','a','s','d' to change reported Location ({},{}).", locationInstance.getLatitude(),
-                locationInstance.getLongitude());
+        //LOG.info("Press 'w','a','s','d' to change reported Location ({},{}).", locationInstance.getLatitude(), locationInstance.getLongitude());
 
         // Start the client
         client.start();

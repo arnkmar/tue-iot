@@ -122,8 +122,7 @@ public class ClientServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-    	//System.out.println("do GET.");
-    	//System.out.println(req);
+
         // all registered clients
         if (req.getPathInfo() == null) {
             Collection<Registration> registrations = new ArrayList<>();
@@ -194,10 +193,6 @@ public class ClientServlet extends HttpServlet {
                 // create & process request
                 ReadRequest request = new ReadRequest(contentFormat, target);
                 ReadResponse cResponse = server.send(registration, request, TIMEOUT);
-                System.out.println(request);
-                System.out.println(contentFormat);
-                System.out.println(target);
-                System.out.println(cResponse.toString());
                 processDeviceResponse(req, resp, cResponse);
             } else {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -256,12 +251,6 @@ public class ClientServlet extends HttpServlet {
 
     	}
 
-
-    				
-    	
-    	System.out.println("ClientServlet->getResource-Registration : "+occupancy[1]);
-
-    	
         LeshanServerSQLite.ToSQLDB("OVERVIEW",10,Instant.now().getEpochSecond(),"Active",registration.getEndpoint(),occupancy[1].toLowerCase(),carID,0,null,null);
         
         return occupancy[1];
@@ -276,30 +265,20 @@ public class ClientServlet extends HttpServlet {
     	
         
         String clientEndpoint = null;
-        //System.out.println("Client Servlet : StartObservation");
-        //System.out.println(occupancy);
-
         // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
         if(occupancy!=null)
             try {
                 String target = "/32700/0/32801";
                 
                 if (registration != null) {
-                    // get content format
-                    
+                    // get content format                
                     ContentFormat contentFormat = ContentFormat.fromName("JSON");
-                            ;
-
                     // create & process request
-                    ObserveRequest request = new ObserveRequest(contentFormat, target);
-                   // System.out.println(target);
-                   // System.out.println(contentFormat);
-                    
+                    ObserveRequest request = new ObserveRequest(contentFormat, target);                    
                     ObserveResponse cResponse = server_static.send(registration, request, TIMEOUT);
-                   // System.out.println(cResponse);
-   
-                } else {
-                	System.out.println("no registered client with id ");
+                } 
+                else {
+                	System.out.println("No registered client with id ");
                 }
             } catch (RuntimeException | InterruptedException e) {
             	System.out.println("Exception ClientServlet:startObservation");
@@ -352,7 +331,6 @@ public class ClientServlet extends HttpServlet {
 	       		processDeviceResponse_user(req, resp, "0;Please Register your vehicle first");
 	       		return;
 	       	}
-        	System.out.println("yes");
         	int StartTime = Integer.valueOf(path[1]);
         	int Endtime = Integer.valueOf(path[2]);   
         	String rate= LeshanServerSQLite.userToDB(1, StartTime, Endtime);
@@ -370,11 +348,13 @@ public class ClientServlet extends HttpServlet {
 	        	String VehicleID = path[1];
 	        	String VehicleName = path[2];   
      	
-			   String str = "INSERT INTO REGISTERED_VEHICLES (TIME,VEHID,VEHNAME) VALUES (" 
+			   String str = "INSERT INTO REGISTERED_VEHICLES (TIME,VEHID,VEHNAME,CRIMNL_RECD,DUES,COMMENTS) VALUES (" 
 			   + Long.toString(Instant.now().getEpochSecond())
 			   + ",'"+VehicleID
 			   + "','"+VehicleName
+			   + "','"+"NO"
 			   + "','"+"0.0"
+			   + "','"+""
 			   + "');" ; 
 
 				if(LeshanServerSQLite.insert(str))  	
@@ -413,7 +393,6 @@ public class ClientServlet extends HttpServlet {
 				   
 			   
 			   try {
-				   System.out.println("*******------------------------**************************");
 				LeshanServerSQLite.insert(str);
 				
 				LeshanServerSQLite.ToSQLDB("IoTParking",1,Instant.now().getEpochSecond(),"Reservation",ClietName,StartTime,Endtime,0,null,vehicleID );
@@ -439,7 +418,6 @@ public class ClientServlet extends HttpServlet {
 
         try {
             String target = StringUtils.removeStart(req.getPathInfo(), "/" + clientEndpoint);
-            System.out.println("Target in Put - "+target);
             Registration registration = server.getRegistrationService().getByEndpoint(clientEndpoint);
             if (registration != null) {
                 // get content format
@@ -471,8 +449,6 @@ public class ClientServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String[] path = StringUtils.split(req.getPathInfo(), '/');
         String clientEndpoint = path[0];
-        System.out.println("Post");
-        System.out.println(req);
 
         // /clients/endPoint/LWRequest/observe : do LightWeight M2M observe request on a given client.
         if (path.length >= 3 && "observe".equals(path[path.length - 1])) {
@@ -488,9 +464,6 @@ public class ClientServlet extends HttpServlet {
 
                     // create & process request
                     ObserveRequest request = new ObserveRequest(contentFormat, target);
-                    System.out.println(target);
-                    System.out.println(contentFormat);
-                    
                     ObserveResponse cResponse = server.send(registration, request, TIMEOUT);
                     processDeviceResponse(req, resp, cResponse);
                 } else {
@@ -605,7 +578,6 @@ public class ClientServlet extends HttpServlet {
             resp.setContentType("application/json");
             resp.getOutputStream().write(response.getBytes());
             resp.setStatus(HttpServletResponse.SC_OK);
-            System.out.println(response);
         }
     }
 
@@ -620,13 +592,11 @@ public class ClientServlet extends HttpServlet {
             resp.setContentType("application/json");
             resp.getOutputStream().write(response.getBytes());
             resp.setStatus(HttpServletResponse.SC_OK);
-            System.out.println(response);
         }
     }    
     
     public void markParkingSpotReserved (String CarID, String ClientName) {
-  	
-    	System.out.println("*******------------------------************************** ClientName " + ClientName);
+
     	String target ="/32700/0/32801";
     	String content = "{\"id\":32801,\"value\":\"reserved\"}";   	
     	serverWriteToParkingSpot(target,content,ClientName);
@@ -651,7 +621,7 @@ public class ClientServlet extends HttpServlet {
         LwM2mNode node;
         try {
             node = gson.fromJson(content, LwM2mNode.class);
-            System.out.println(node);
+
         } catch (JsonSyntaxException e) {
             throw new InvalidRequestException(e, "unable to parse json to tlv:%s", e.getMessage());
         }
@@ -669,8 +639,6 @@ public class ClientServlet extends HttpServlet {
 			
 		}
         
-       // System.out.println(cResponse);
-        
     }
     
 
@@ -683,7 +651,6 @@ public class ClientServlet extends HttpServlet {
             LwM2mNode node;
             try {
                 node = gson.fromJson(content, LwM2mNode.class);
-                System.out.println(node);
             } catch (JsonSyntaxException e) {
                 throw new InvalidRequestException(e, "unable to parse json to tlv:%s", e.getMessage());
             }
