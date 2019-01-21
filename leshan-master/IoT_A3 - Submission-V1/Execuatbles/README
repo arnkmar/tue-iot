@@ -1,0 +1,7 @@
+Read the 'README' fine presend in Fodler - Server and Client. Run the necessary commands as mentioned in them.
+
+Open userInterface.py and change Serverip in line 8. You replace it with IP address of the http server.
+
+To make a reservation or register a vehcile to parking system run the below command and follow the instructions
+
+pyhton userInterface.py

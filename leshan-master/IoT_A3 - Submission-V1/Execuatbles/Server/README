@@ -1,0 +1,14 @@
+Execute the following commands on terminal
+
+To publish the service run below command: 
+avahi-publish-service IoTParkingServer-Group4 _coap._udp 5683 “/mylight” &
+
+
+To start the LWm2M server run below command replacing the IP address of the server :
+java -jar leshanparkingserver-group4.jar -lh 192.168.178.44 -wh 192.168.178.44
+
+
+To have a overview of the data run the follwing scrips :
+./manager_overview
+./manager_registration
+./manager_spotTable

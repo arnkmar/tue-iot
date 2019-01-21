@@ -1,0 +1,7 @@
+To start LWM2M client and connect to a server run :
+
+python serviceDiscoveryConnect.py
+
+To enable the pi to capture images from the camera and identify vehicle run the below command
+
+python plateRecog.py
